@@ -102,6 +102,9 @@ typedef struct {
    bool binary;
    bool binary_double;
 
+   // Single or per-step
+   bool single_file;
+
    // Output categories
    bool natural;
    bool conservation;
@@ -111,8 +114,14 @@ typedef struct {
    int    skip_steps;
    double skip_t;
 
+   // Mask formats
+   std::string format_simtime;
+   std::string format_index;
+   std::string format_step;
+
    // File
    //TODO
+   std::string base_filename;
    std::string filename;
    FILE *file;
 } t_output;

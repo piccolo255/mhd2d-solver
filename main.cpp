@@ -83,7 +83,9 @@ int main
 
    /* Initialize */
    inputData( argv[1], output_grid, output_non_grid, params, data );
-   openFile( output_grid );
+   if( output_grid.single_file ){
+      openFile( output_grid );
+   }
    openFile( output_non_grid );
    outputGridData( output_grid, params, data, 0, 0 );
    outputNonGridData( output_non_grid, params, data, 0, 0 );

@@ -5,9 +5,9 @@
 void openFile
    ( t_output &output
 ){
-   if( output.filename == "stdout" )
+   if( output.filename == "stdout" ){
       output.file = stdout;
-   else {
+   } else {
       if( output.binary ){
          output.file = fopen( output.filename.c_str(), "wb" );
       } else {
@@ -24,8 +24,9 @@ void openFile
 void closeFile
    ( t_output &output
 ){
-   if( output.file != stdout )
+   if( output.file != stdout ){
       fclose( output.file );
+   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -166,6 +167,9 @@ void inputData
       binary_hint_file = "dummy";
    }
 
+   // Single file or separate files
+   output_grid.single_file = readEntry<bool>( pt, "output grid", "single file", true );
+
    // How often to output data, can be given as time or as steps
    tempstr = readEntry<std::string>( pt, "output grid", "mode", "step" );
    output_grid.skip_mode = fromString<WriteSkipMode>( tempstr );
@@ -204,9 +208,10 @@ void inputData
 
    // Construct time string
    std::time_t tt = std::chrono::system_clock::to_time_t( std::chrono::system_clock::now() );
-   struct std::tm * ptm = std::localtime(&tt);
+   struct std::tm *ptm = std::localtime(&tt);
    char buffer[80];
    strftime( buffer, 80, "%Y-%m-%d-%H-%M-%S", ptm );
+   delete ptm;
    std::string timestr( buffer );
    // Get filename without the extension
    std::string mainname = filename.substr( 0, filename.find_last_of( "." ) );
@@ -220,6 +225,23 @@ void inputData
    boost::replace_all( binary_hint_file, "%f", filename );
    boost::replace_all( binary_hint_file, "%m", mainname );
    boost::replace_all( binary_hint_file, "%t", timestr  );
+   if( output_grid.single_file ){
+      // remove fields that are only used for separate output
+      boost::replace_all( output_grid.filename, "%rs", "" );
+      boost::replace_all( output_grid.filename, "%ri", "" );
+      boost::replace_all( output_grid.filename, "%rt", "" );
+   }
+
+   // Read formatting strings
+   if( output_grid.filename.find("%rs") != std::string::npos ){
+      output_grid.format_step = readEntry<std::string>( pt, "output grid", "rs format", "%08d" );
+   }
+   if( output_grid.filename.find("%ri") != std::string::npos ){
+      output_grid.format_index = readEntry<std::string>( pt, "output grid", "ri format", "%08d" );
+   }
+   if( output_grid.filename.find("%rt") != std::string::npos ){
+      output_grid.format_simtime = readEntry<std::string>( pt, "output grid", "rt format", "%015.8f" );
+   }
 
    // Logging parameters
    params.log_params.r_step    = readEntry<bool>( pt, "logging", "phi correction", false );
@@ -732,7 +754,8 @@ void outputBinaryHintFile
                            params.start_x, params.start_x + params.nx*params.dx,
                            params.start_y, params.start_y + params.ny*params.dy );
    fprintf( bin_hint.file, "block_size = %d*%d\n", field_count, field_size );
-   fprintf( bin_hint.file, "record = (ny,nx)\n" );
+   fprintf( bin_hint.file, "record = (nx,ny)\n" );
+   fprintf( bin_hint.file, "WARNING: for versions of gnuplot < 5.0.5, record = (ny,nx)" );
    fprintf( bin_hint.file, "skip   = index*nx*ny*block_size\n" );
    fprintf( bin_hint.file, "format = \"%%%d%s\"\n", field_count, binary_data_type );
 
@@ -744,7 +767,7 @@ void outputBinaryHintFile
                            params.start_x, params.start_x + params.nx*params.dx,
                            params.start_y, params.start_y + params.ny*params.dy );
    fprintf( bin_hint.file, "block_size = %d*%d\n", field_count, field_size );
-   fprintf( bin_hint.file, "plot datafile binary record=(ny,nx) skip=index*nx*ny*block_size"
+   fprintf( bin_hint.file, "plot datafile binary record=(nx,ny) skip=index*nx*ny*block_size"
                            " format=\"%%%d%s\" u 1:2:3 w image\n", field_count, binary_data_type );
 
    closeFile( bin_hint );
@@ -755,8 +778,8 @@ void outputGridDataBinary
    ( const t_output &output
    , const t_params &params
    , const t_data   &data
-   , int    /*step*/ //unused
-   , int    /*index*/ //unused
+   , int    step
+   , int    index
    , int    divb_nxfirst
    , int    divb_nxlast
    , int    divb_nyfirst
@@ -782,7 +805,23 @@ void outputGridDataBinary
    const int kby  = 5;
    double    divb;
 
-   if( output.binary_double ){
+   t_output local_output = output;
+   if( !local_output.single_file ){
+      char buf[80];
+      std::snprintf( buf, 80, local_output.format_step.c_str(), step );
+      std::string str_step( buf );
+      std::snprintf( buf, 80, local_output.format_index.c_str(), index );
+      std::string str_index( buf );
+      std::snprintf( buf, 80, local_output.format_simtime.c_str(), data.t_current );
+      std::string str_time(buf);
+      // Replace masks for output filenames
+      boost::replace_all( local_output.filename, "%rs", str_step  );
+      boost::replace_all( local_output.filename, "%ri", str_index );
+      boost::replace_all( local_output.filename, "%rt", str_time  );
+      openFile( local_output );
+   }
+
+   if( local_output.binary_double ){
       ri = 0;
       for( int i = NXFIRST; i < NXLAST; i++ ){
          for( int j = NYFIRST; j < NYLAST; j++ ){
@@ -799,7 +838,7 @@ void outputGridDataBinary
             records_double[ri++] = params.start_x + (i-NXFIRST)*params.dx;
             records_double[ri++] = params.start_y + (j-NYFIRST)*params.dy;
             records_double[ri++] = U[0][i][j];     // rho
-            if( output.natural ){
+            if( local_output.natural ){
                records_double[ri++] = u[0][i][j];  // u
                records_double[ri++] = u[1][i][j];  // v
                records_double[ri++] = u[2][i][j];  // w
@@ -809,7 +848,7 @@ void outputGridDataBinary
             records_double[ri++] = U[5][i][j];     // By
             records_double[ri++] = U[6][i][j];     // Bz
             records_double[ri++] = divb;           // div B
-            if( output.conservation ){
+            if( local_output.conservation ){
                records_double[ri++] = U[1][i][j];  // mx
                records_double[ri++] = U[2][i][j];  // my
                records_double[ri++] = U[3][i][j];  // mz
@@ -819,7 +858,7 @@ void outputGridDataBinary
       }
 
       // write all of the records to file at once
-      fwrite( records_double, sizeof(*records_double), record_count, output.file );
+      fwrite( records_double, sizeof(*records_double), record_count, local_output.file );
    } else {
       ri = 0;
       for( int i = NXFIRST; i < NXLAST; i++ ){
@@ -837,7 +876,7 @@ void outputGridDataBinary
             records_float[ri++] = params.start_x + (i-NXFIRST)*params.dx;
             records_float[ri++] = params.start_y + (j-NYFIRST)*params.dy;
             records_float[ri++] = U[0][i][j];     // rho
-            if( output.natural ){
+            if( local_output.natural ){
                records_float[ri++] = u[0][i][j];  // u
                records_float[ri++] = u[1][i][j];  // v
                records_float[ri++] = u[2][i][j];  // w
@@ -847,7 +886,7 @@ void outputGridDataBinary
             records_float[ri++] = U[5][i][j];     // By
             records_float[ri++] = U[6][i][j];     // Bz
             records_float[ri++] = divb;           // div B
-            if( output.conservation ){
+            if( local_output.conservation ){
                records_float[ri++] = U[1][i][j];  // mx
                records_float[ri++] = U[2][i][j];  // my
                records_float[ri++] = U[3][i][j];  // mz
@@ -857,7 +896,11 @@ void outputGridDataBinary
       }
 
       // write all of the records to file at once
-      fwrite( records_float, sizeof(*records_float), record_count, output.file );
+      fwrite( records_float, sizeof(*records_float), record_count, local_output.file );
+   }
+
+   if( !local_output.single_file ){
+      closeFile( local_output );
    }
 
    free( records_float );
