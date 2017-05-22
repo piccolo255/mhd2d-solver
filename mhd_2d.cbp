@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="MHD2D Solver" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/mhd2d" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-pedantic" />
+					<Add option="-Wextra" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-DDEBUG" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/mhd2d" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-march=corei7" />
+					<Add option="-O3" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="DebugMem">
+				<Option output="bin/DebugMem/mhd2d" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/DebugMem/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-ggdb" />
+				</Compiler>
+			</Target>
+			<Target title="Profile">
+				<Option output="bin/Profile/mhd2d" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin/Profile/" />
+				<Option object_output="obj/Profile/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-pg" />
+					<Add option="-g" />
+				</Compiler>
+				<Linker>
+					<Add option="-pg -lgmon" />
+				</Linker>
+			</Target>
+			<Target title="Release-OpenMP">
+				<Option output="bin/Release/mhd2d-openmp" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release-OpenMP/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-march=corei7" />
+					<Add option="-O3" />
+					<Add option="-fopenmp" />
+					<Add option="-DOPENMP" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-fopenmp" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-std=c++11" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Unit filename="conversions.cpp" />
+		<Unit filename="div_b_fix.cpp" />
+		<Unit filename="enums.cpp" />
+		<Unit filename="enums.hpp" />
+		<Unit filename="file_access.cpp" />
+		<Unit filename="file_access.hpp" />
+		<Unit filename="main.cpp" />
+		<Unit filename="mhd2d.hpp" />
+		<Unit filename="scheme_central_fd.cpp" />
+		<Unit filename="scheme_eno.cpp" />
+		<Unit filename="scheme_eno.hpp" />
+		<Unit filename="time_steppers.cpp" />
+		<Unit filename="vector_utilities.cpp" />
+		<Unit filename="vector_utilities.hpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
