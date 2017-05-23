@@ -273,7 +273,9 @@ int main
    }
 
    /* Cleanup */
-   closeFile( output_grid );
+   if( output_grid.single_file ){
+      closeFile( output_grid );
+   }
    closeFile( output_non_grid );
 
    // output program stats
