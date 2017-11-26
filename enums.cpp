@@ -76,7 +76,6 @@ std::string toString<WriteFileCountMode>
    case WriteFileCountMode::Single:
       name = "single";
       break;
-      break;
    case WriteFileCountMode::Multiple:
       name = "multiple";
       break;

@@ -479,6 +479,12 @@ void applyBoundaryConditions
       }
       break;
    case BoundaryCondition::Dirichlet:
+      for( int k = 0; k < PRB_DIM; k++ ){
+         for( int j = 0; j < NY; j++ ){
+            U[k][NXFIRST-2][j] = params.boundary_dirichlet_U[params.b_left][k][j];
+            U[k][NXFIRST-1][j] = params.boundary_dirichlet_U[params.b_left][k][j];
+         }
+      }
       break;
    case BoundaryCondition::Neumann:
       for( int k = 0; k < PRB_DIM; k++ ){
@@ -531,6 +537,12 @@ void applyBoundaryConditions
       }
       break;
    case BoundaryCondition::Dirichlet:
+      for( int k = 0; k < PRB_DIM; k++ ){
+         for( int j = 0; j < NY; j++ ){
+            U[k][NXLAST  ][j] = params.boundary_dirichlet_U[params.b_right][k][j];
+            U[k][NXLAST+1][j] = params.boundary_dirichlet_U[params.b_right][k][j];
+         }
+      }
       break;
    case BoundaryCondition::Neumann:
       for( int k = 0; k < PRB_DIM; k++ ){
@@ -583,6 +595,12 @@ void applyBoundaryConditions
       }
       break;
    case BoundaryCondition::Dirichlet:
+      for( int k = 0; k < PRB_DIM; k++ ){
+         for( int i = 0; i < NX; i++ ){
+            U[k][i][NYFIRST-2] = params.boundary_dirichlet_U[params.b_bottom][k][i];
+            U[k][i][NYFIRST-1] = params.boundary_dirichlet_U[params.b_bottom][k][i];
+         }
+      }
       break;
    case BoundaryCondition::Neumann:
       for( int k = 0; k < PRB_DIM; k++ ){
@@ -635,6 +653,12 @@ void applyBoundaryConditions
       }
       break;
    case BoundaryCondition::Dirichlet:
+      for( int k = 0; k < PRB_DIM; k++ ){
+         for( int i = 0; i < NX; i++ ){
+            U[k][i][NYLAST  ] = params.boundary_dirichlet_U[params.b_top][k][i];
+            U[k][i][NYLAST+1] = params.boundary_dirichlet_U[params.b_top][k][i];
+         }
+      }
       break;
    case BoundaryCondition::Neumann:
       for( int k = 0; k < PRB_DIM; k++ ){

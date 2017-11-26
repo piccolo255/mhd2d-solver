@@ -29,7 +29,6 @@ void divBCalculation
       }
       break;
    case BoundaryCondition::Dirichlet:
-      break;
    case BoundaryCondition::Neumann:
       nxfirst = NXFIRST+1;
       break;
@@ -51,7 +50,6 @@ void divBCalculation
       }
       break;
    case BoundaryCondition::Dirichlet:
-      break;
    case BoundaryCondition::Neumann:
       nxlast  = NXLAST-1;
       break;
@@ -73,7 +71,6 @@ void divBCalculation
       }
       break;
    case BoundaryCondition::Dirichlet:
-      break;
    case BoundaryCondition::Neumann:
       nyfirst = NYFIRST+1;
       break;
@@ -95,7 +92,6 @@ void divBCalculation
       }
       break;
    case BoundaryCondition::Dirichlet:
-      break;
    case BoundaryCondition::Neumann:
       nylast  = NYLAST-1;
       break;
@@ -177,7 +173,6 @@ int divBCorrectionSOR
       }
       break;
    case BoundaryCondition::Dirichlet:
-      break;
    case BoundaryCondition::Neumann:
       nxfirst = NXFIRST+1;
       break;
@@ -199,7 +194,6 @@ int divBCorrectionSOR
       }
       break;
    case BoundaryCondition::Dirichlet:
-      break;
    case BoundaryCondition::Neumann:
       nxlast  = NXLAST-1;
       break;
@@ -221,7 +215,6 @@ int divBCorrectionSOR
       }
       break;
    case BoundaryCondition::Dirichlet:
-      break;
    case BoundaryCondition::Neumann:
       nyfirst = NYFIRST+1;
       break;
@@ -243,7 +236,6 @@ int divBCorrectionSOR
       }
       break;
    case BoundaryCondition::Dirichlet:
-      break;
    case BoundaryCondition::Neumann:
       nylast  = NYLAST-1;
       break;

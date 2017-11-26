@@ -156,6 +156,7 @@ typedef struct {
    const int b_right  = 2;
    const int b_top    = 3;
    BoundaryCondition boundary[4];
+   t_vectors         boundary_dirichlet_U[4];
    TimeStepMethod    time_stepping;
    IntegrationMethod scheme;
 

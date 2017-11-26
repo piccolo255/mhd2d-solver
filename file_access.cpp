@@ -211,7 +211,6 @@ void inputData
    struct std::tm *ptm = std::localtime(&tt);
    char buffer[80];
    strftime( buffer, 80, "%Y-%m-%d-%H-%M-%S", ptm );
-   delete ptm;
    std::string timestr( buffer );
    // Get filename without the extension
    std::string mainname = filename.substr( 0, filename.find_last_of( "." ) );
@@ -709,11 +708,25 @@ void readProblemPlasmaSheet
          exit( RET_ERR_WRONG_PARAMETER );
          break;
       case BoundaryCondition::Dirichlet:
-         ERROUT << "ERROR: readProblemPlasmaSheet: in section [problem], key \"" << boundary_key << "\":\n"
-                << "       Boundary condition not yet implemented: " << tempstr << LF;
-         exit( RET_ERR_WRONG_PARAMETER );
+   //      ERROUT << "ERROR: readProblemPlasmaSheet: in section [problem], key \"" << boundary_key << "\":\n"
+   //             << "       Boundary condition not yet implemented: " << tempstr << LF;
+   //      exit( RET_ERR_WRONG_PARAMETER );
    //      params.boundary_left_U = createVector( PRB_DIM );
    //      params.boundary_left_U[0] = readEntry<double>( pt, "problem", "boundary rho", data.U[0][NXFIRST] );
+         params.boundary_dirichlet_U[params.b_left  ] = createVectors( PRB_DIM, NY );
+         params.boundary_dirichlet_U[params.b_top   ] = createVectors( PRB_DIM, NX );
+         params.boundary_dirichlet_U[params.b_right ] = createVectors( PRB_DIM, NY );
+         params.boundary_dirichlet_U[params.b_bottom] = createVectors( PRB_DIM, NX );
+         for( int k = 0; k < PRB_DIM; k++ ){
+            for( int j = NYFIRST; j < NYLAST; j++ ){
+               params.boundary_dirichlet_U[params.b_left ][k][j] = data.U[k][NXFIRST ][j];
+               params.boundary_dirichlet_U[params.b_right][k][j] = data.U[k][NXLAST-1][j];
+            }
+            for( int i = NXFIRST; i < NXLAST; i++ ){
+               params.boundary_dirichlet_U[params.b_bottom][k][i] = data.U[k][i][NYFIRST ];
+               params.boundary_dirichlet_U[params.b_top   ][k][i] = data.U[k][i][NYLAST-1];
+            }
+         }
          break;
       case BoundaryCondition::Periodic:
       case BoundaryCondition::Neumann:
