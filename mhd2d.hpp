@@ -133,6 +133,19 @@ typedef struct {
 } t_log_params;
 
 typedef struct {
+   bool           isError;
+   ReturnStatus   status;
+   std::string    message;
+} t_status;
+
+typedef struct {
+   BoundaryCondition right;
+   BoundaryCondition top;
+   BoundaryCondition left;
+   BoundaryCondition bottom;
+} t_boundary;
+
+typedef struct {
    // Grid parameters
    int    nx;
    int    ny;

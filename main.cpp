@@ -52,7 +52,7 @@ int main
    ( int    argc
    , char **argv
 ){
-   namespace nchrono = std::chrono;
+   namespace nchrono = ::std::chrono;
 
    #ifdef DEBUG
       OUT << "Program arguments, argc = " << argc << LF;

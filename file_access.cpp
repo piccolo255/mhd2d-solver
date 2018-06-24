@@ -61,7 +61,7 @@ void inputData
    , t_params &params
    , t_data   &data
 ){
-   namespace nptree = boost::property_tree;
+   namespace nptree = ::boost::property_tree;
    nptree::ptree pt;
    std::string tempstr;
 

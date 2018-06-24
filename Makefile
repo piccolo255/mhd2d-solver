@@ -28,8 +28,8 @@ endif
 LIBS = 
 
 # Sources
-SRCS = main.cpp conversions.cpp div_b_fix.cpp file_access.cpp scheme_central_fd.cpp scheme_eno.cpp time_steppers.cpp vector_utilities.cpp enums.cpp
-HDRS = mhd2d.hpp scheme_eno.hpp vector_utilities.hpp file_access.hpp enums.hpp
+SRCS = main.cpp conversions.cpp div_b_fix.cpp file_access.cpp scheme_central_fd.cpp scheme_eno.cpp time_steppers.cpp vector_utilities.cpp enums.cpp spatialintegrationmethod.cpp
+HDRS = mhd2d.hpp scheme_eno.hpp vector_utilities.hpp file_access.hpp enums.hpp spatialintegrationmethod.hpp
 
 # Object files
 OBJS = $(SRCS:.cpp=.o)

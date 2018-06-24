@@ -89,6 +89,8 @@
 		<Unit filename="scheme_central_fd.cpp" />
 		<Unit filename="scheme_eno.cpp" />
 		<Unit filename="scheme_eno.hpp" />
+		<Unit filename="spatialintegrationmethod.cpp" />
+		<Unit filename="spatialintegrationmethod.hpp" />
 		<Unit filename="time_steppers.cpp" />
 		<Unit filename="vector_utilities.cpp" />
 		<Unit filename="vector_utilities.hpp" />
