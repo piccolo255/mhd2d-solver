@@ -8,6 +8,7 @@ class SpatialIntegrationMethod
    public:
       explicit SpatialIntegrationMethod( int          nx
                                        , int          ny
+                                       , int          bufferWidth
                                        , double       dx
                                        , double       dy
                                        , t_boundary   boundary
@@ -21,14 +22,22 @@ class SpatialIntegrationMethod
                                 ) = 0;
 
    protected:
+      const int         nxProblem;
+      const int         nyProblem;
+      const int         bufferWidth;
+      const double      dx;
+      const double      dy;
+      const t_boundary  boundary;
+      const double      gamma;
+
+      const int nxFirst;
+      const int nyFirst;
+      const int nxLast;
+      const int nyLast;
+      const int nxTotal;
+      const int nyTotal;
 
    private:
-      int         nx;
-      int         ny;
-      double      dx;
-      double      dy;
-      t_boundary  boundary;
-      double      gamma;
 };
 
 #endif // SPATIALINTEGRATIONMETHOD_H
