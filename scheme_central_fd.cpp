@@ -1,13 +1,13 @@
 #include "mhd2d.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int methodCentralFD
+t_status methodCentralFD
    ( t_matrices  /*U*/
    , t_matrices  /*UL*/
    , double     &/*dt_step*/
    , const t_params &/*params*/
 ){
-   return RET_ERR_NOT_IMPLEMENTED;
+   return { true, ReturnStatus::ErrorNotImplemented, "central finite difference is not implemented" };
 
 //   static int initialized = 0;
 //   static t_matrices F;

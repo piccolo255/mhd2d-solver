@@ -258,33 +258,33 @@ void toConservationData
    , t_data &data );
 
 // Time stepper - Third order optimal TVD Runge-Kutta time stepping method
-int stepRK3TVD
+t_status stepRK3TVD
    ( t_matrices  U
    , double     &dt
    , const t_params &params );
 
 // Time stepper - Euler time stepping method
-int stepEuler
+t_status stepEuler
    ( t_matrices  U
    , double     &dt
    , const t_params &params );
 
 // Scheme - central FD
-int methodCentralFD
+t_status methodCentralFD
    ( t_matrices  U
    , t_matrices  UL
    , double     &dt_step
    , const t_params &params );
 
 // Scheme - ENO-Roe with characteristics decomposition
-int methodENOSystem
+t_status methodENOSystem
    ( t_matrices  U
    , t_matrices  UL
    , double     &dt_step
    , const t_params &params );
 
 // Div B correction - calculated in place, using SOR (Successive Over-Relaxation)
-int divBCorrectionSOR
+t_status divBCorrectionSOR
    ( t_matrices U
    , const t_params &params );
 

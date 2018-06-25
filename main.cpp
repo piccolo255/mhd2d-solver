@@ -99,7 +99,7 @@ int main
    bool done = false;
    int step = 1;
    int record_index = 1;
-   int retval;
+   t_status retval;
    double output_time_file   = output_grid.skip_t;
    double output_time_screen = params.t_max/100.0;
    double output_time_non_grid = output_non_grid.skip_t;
@@ -126,13 +126,13 @@ int main
       }
 
       // Process the return value
-      if( retval == RET_ERR_TIME_UNDERFLOW ){
+      if( retval.status == ReturnStatus::ErrorTimeUnderflow ){
          ERROUT << "ERROR: main: Time step size smaller than the smallest allowed value.\n"
                 << "       Reached at step #" << step << ", at t = " << data.t_current << ".\n"
                 << "       The simulation will now terminate." << LF;
          break;
       }
-      if( retval < 0 ){
+      if( retval.isError ){
          // other errors
          ERROUT << "ERROR: main: Terminating simulation." << LF;
          break;
@@ -160,7 +160,7 @@ int main
                   break;
                }
                retval = divBCorrectionSOR( data.U, params );
-               if( retval == RET_ERR_NOT_CONVERGED ){
+               if( retval.status == ReturnStatus::ErrorNotConverged ){
                   ERROUT << "WARNING: Div B corrector, r failed to converge.\n";
                   break;
                }

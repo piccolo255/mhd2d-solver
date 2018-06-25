@@ -2,7 +2,7 @@
 #include "scheme_eno.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int getEigenvalues
+t_status getEigenvalues
    ( double U[PRB_DIM]
    , double gamma
    , double lambda[PRB_DIM]
@@ -21,7 +21,7 @@ int getEigenvalues
    if( r < 0.0 ){
       ERROUT << "ERROR: getEigenvalues: Negative density encountered!\n"
              << "       The simulation will now terminate." << LF;
-      return RET_ERR_NEG_DENSITY;
+      return { true, ReturnStatus::ErrorNegativeDensity, "negative density encountered\n! getEigenvalues" };
    }
 
    // vector inner products
@@ -40,7 +40,7 @@ int getEigenvalues
                 << "         * e = "  << e << ", bb = " << bb << ", uu = " << mm/r << LF
                 << "         * p = " << p << LF;
 
-         return RET_ERR_NEG_PRESSURE;
+         return { true, ReturnStatus::ErrorNegativePressure, "negative pressure encountered\n! getEigenvalues" };
       } else {
          ERROUT << "WARNING: getEigenvalues: Negative pressure encountered!\n"
                 << "         Results from this point on are suspect.\n"
@@ -72,11 +72,11 @@ int getEigenvalues
    lambda[6] = u + cf;
    lambda[7] = 0;
 
-   return RET_OK;
+   return { false, ReturnStatus::OK, "" };
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int getEigenvalues
+t_status getEigenvalues
    ( double U1[PRB_DIM]
    , double U2[PRB_DIM]
    , double gamma
@@ -95,7 +95,7 @@ int getEigenvalues
    if( r <= 0.0 ){
       ERROUT << "ERROR: getEigens_F: Negative density encountered!\n"
              << "       The simulation will now terminate." << LF;
-      return RET_ERR_NEG_DENSITY;
+      return { true, ReturnStatus::ErrorNegativeDensity, "negative density encountered\n! getEigenvalues" };
    }
 
    // vector inner products
@@ -115,7 +115,7 @@ int getEigenvalues
    if( p < 0.0 ){
       if( break_on_neg_pressure ){
          ERROUT << "ERROR: getEigens_F: Negative pressure encountered!" << LF;
-         return RET_ERR_NEG_PRESSURE;
+         return { true, ReturnStatus::ErrorNegativePressure, "negative pressure encountered\n! getEigenvalues" };
       } else {
          ERROUT << "WARNING: getEigens_F: Negative pressure encountered!\n"
                 << "         Results from this point on are suspect.\n"
@@ -147,11 +147,11 @@ int getEigenvalues
    lambda[6] = u + cf;
    lambda[7] = 0;
 
-   return RET_OK;
+   return { false, ReturnStatus::OK, "" };
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int getEigens_F
+t_status getEigens_F
    ( double U1[PRB_DIM]
    , double U2[PRB_DIM]
    , double gamma
@@ -173,7 +173,7 @@ int getEigens_F
    if( r <= 0.0 ){
       ERROUT << "ERROR: getEigens_F: Negative density encountered!\n"
              << "       The simulation will now terminate." << LF;
-      return RET_ERR_NEG_DENSITY;
+      return { true, ReturnStatus::ErrorNegativeDensity, "negative density encountered\n! getEigens_F" };
    }
 
    // vector inner products
@@ -193,7 +193,7 @@ int getEigens_F
    if( p < 0.0 ){
       if( break_on_neg_pressure ){
          ERROUT << "ERROR: getEigens_F: Negative pressure encountered!" << LF;
-         return RET_ERR_NEG_PRESSURE;
+         return { true, ReturnStatus::ErrorNegativePressure, "negative pressure encountered\n! getEigens_F" };
       } else {
          ERROUT << "WARNING: getEigens_F: Negative pressure encountered!\n"
                 << "         Results from this point on are suspect.\n"
@@ -430,11 +430,11 @@ int getEigens_F
       lv[4][k] *= csfactor;
    }
 
-   return RET_OK;
+   return { false, ReturnStatus::OK, "" };
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int getEigens_G
+t_status getEigens_G
    ( double U1[PRB_DIM]
    , double U2[PRB_DIM]
    , double gamma
@@ -448,7 +448,9 @@ int getEigens_G
    std::swap( U1[4], U1[5] ); std::swap( U2[4], U2[5] );
 
    // get eigens for inverted x and y
-   int ret = getEigens_F( U1, U2, gamma, lambda, lv, rv, break_on_neg_pressure );
+   auto retval = getEigens_F( U1, U2, gamma, lambda, lv, rv, break_on_neg_pressure );   if( retval.status != ReturnStatus::OK ){
+      retval.message += "\n! getEigens_G";
+   }
 
    // return eigenvectors to proper axes
    for( int i = 0; i < PRB_DIM; i++ ){
@@ -456,7 +458,7 @@ int getEigens_G
       std::swap( rv[i][4], rv[i][5] ); std::swap( lv[i][4], lv[i][5] );
    }
 
-   return ret;
+   return retval;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -750,7 +752,7 @@ void getFluxes
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int findNumericalFluxRoe_F
+t_status findNumericalFluxRoe_F
    ( double  U1[PRB_DIM]
    , double  U2[PRB_DIM]
    , double  F[PRB_DIM][8]
@@ -775,9 +777,10 @@ int findNumericalFluxRoe_F
    int i = TNFIRST+1;
 
    // eigensystem
-   int retval = getEigens_F( U1, U2, params.gamma, a, lv, rv, params.break_on_neg_pressure );
-   if( retval != RET_OK ){
+   auto retval = getEigens_F( U1, U2, params.gamma, a, lv, rv, params.break_on_neg_pressure );
+   if( retval.status != ReturnStatus::OK ){
       ERROUT << "ERROR: findNumericalFluxRoe_F: Flux eigensystem." << LF;
+      retval.message += "\n! findNumericalFluxRoe_F";
       return retval;
    }
 
@@ -851,11 +854,11 @@ int findNumericalFluxRoe_F
          F_[k] += rv[l][k]*fw[l];
    }
 
-   return RET_OK;
+   return { false, ReturnStatus::OK, "" };
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int findNumericalFluxRoe_G
+t_status findNumericalFluxRoe_G
    ( double  U1[PRB_DIM]
    , double  U2[PRB_DIM]
    , double  G[PRB_DIM][8]
@@ -877,7 +880,10 @@ int findNumericalFluxRoe_G
    }
 
    // find flux for inverted x and y
-   int retval = findNumericalFluxRoe_F( U1, U2, G, VUG, G_, a_max, first_valid, last_valid, params );
+   auto retval = findNumericalFluxRoe_F( U1, U2, G, VUG, G_, a_max, first_valid, last_valid, params );
+   if( retval.status != ReturnStatus::OK ){
+      retval.message += "\n! findNumericalFluxRoe_G";
+   }
 
    // return found flux to proper axes
    std::swap( G_[1], G_[2] ); std::swap( G_[4], G_[5] );
@@ -886,7 +892,7 @@ int findNumericalFluxRoe_G
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int findNumericalFluxLF_F
+t_status findNumericalFluxLF_F
    ( double  U1[PRB_DIM]
    , double  U2[PRB_DIM]
    , double  U[PRB_DIM][8]
@@ -913,9 +919,10 @@ int findNumericalFluxLF_F
    int i = TNFIRST+1;
 
    // eigensystem
-   int retval = getEigens_F( U1, U2, params.gamma, a, lv, rv, params.break_on_neg_pressure );
-   if( retval != RET_OK ){
+   auto retval = getEigens_F( U1, U2, params.gamma, a, lv, rv, params.break_on_neg_pressure );
+   if( retval.status != ReturnStatus::OK ){
       ERROUT << "ERROR: findNumericalFluxLF_F: Flux eigensystem." << LF;
+      retval.message += "\n! findNumericalFluxLF_F";
       return retval;
    }
 
@@ -984,11 +991,11 @@ int findNumericalFluxLF_F
          F_[k] += rv[l][k]*fw[l];
    }
 
-   return RET_OK;
+   return { false, ReturnStatus::OK, "" };
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int findNumericalFluxLF_G
+t_status findNumericalFluxLF_G
    ( double  U1[PRB_DIM]
    , double  U2[PRB_DIM]
    , double  U[PRB_DIM][8]
@@ -1009,7 +1016,10 @@ int findNumericalFluxLF_G
    }
 
    // find flux for inverted x and y
-   int retval = findNumericalFluxLF_F( U1, U2, U, G, G_, a_max, alpha, first_valid, last_valid, params );
+   auto retval = findNumericalFluxLF_F( U1, U2, U, G, G_, a_max, alpha, first_valid, last_valid, params );
+   if( retval.status != ReturnStatus::OK ){
+      retval.message += "\n! findNumericalFluxLF_G";
+   }
 
    // return found flux to proper axes
    std::swap( G_[1], G_[2] ); std::swap( G_[4], G_[5] );
@@ -1018,7 +1028,7 @@ int findNumericalFluxLF_G
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int methodENOSystem
+t_status methodENOSystem
    ( t_matrices  U
    , t_matrices  UL
    , double     &dt_step
@@ -1030,7 +1040,7 @@ int methodENOSystem
    static t_matrices F_, G_;    // numerical fluxes
    double alpha[PRB_DIM];       // viscosity coefficient in the Lax-Friedrichs flux splitting
    static t_vectors alphaF, alphaG; // alpha for every row, column
-   int retval;                  // for processing function return values
+   t_status retval;             // for processing function return values
    static int *first_valid_F;
    static int *first_valid_G;
    static int *last_valid_F;
@@ -1137,12 +1147,13 @@ int methodENOSystem
             }
             // get localized eigenvalues
             retval = getEigenvalues( tU1, params.gamma, talpha, params.break_on_neg_pressure );
-            if( retval != RET_OK ){
+            if( retval.status != ReturnStatus::OK ){
                ERROUT << "ERROR: methodENOSystem: F eigenvalues." << LF;
                ERROUT << "       Details:" << LF
                       << "         * x = " << params.start_x + (i-NXFIRST)*params.dx << "; i = " << i-NXFIRST << LF
                       << "         * y = " << params.start_y + (j-NYFIRST)*params.dy << "; j = " << j-NYFIRST << LF;
 
+               retval.message += "\n! methodENOSystem -> F eigenvalues";
                return retval;
             }
             // update row, column maximums
@@ -1161,12 +1172,13 @@ int methodENOSystem
 
             // get localized eigenvalues
             retval = getEigenvalues( tU1, params.gamma, talpha, params.break_on_neg_pressure );
-            if( retval != RET_OK ){
+            if( retval.status != ReturnStatus::OK ){
                ERROUT << "ERROR: methodENOSystem: G eigenvalues." << LF;
                ERROUT << "       Details:" << LF
                       << "         * x = " << params.start_x + (i-NXFIRST)*params.dx << "; i = " << i-NXFIRST << LF
                       << "         * y = " << params.start_y + (j-NYFIRST)*params.dy << "; j = " << j-NYFIRST << LF;
 
+               retval.message += "\n! methodENOSystem -> G eigenvalues";
                return retval;
             }
             // update row, column maximums
@@ -1220,8 +1232,9 @@ int methodENOSystem
          } else if( params.scheme == IntegrationMethod::ENO_LF ){
             retval = findNumericalFluxLF_F( tU1, tU2, tU, tF, tF_, ta_max, alpha, first_valid_F[i], last_valid_F[i], params );
          }
-         if( retval != RET_OK ){
+         if( retval.status != ReturnStatus::OK ){
             ERROUT << "ERROR: methodENOSystem: F numerical flux." << LF;
+            retval.message += "\n! methodENOSystem -> F flux";
             for_break = true;
             break;
          }
@@ -1286,8 +1299,9 @@ int methodENOSystem
          } else if( params.scheme == IntegrationMethod::ENO_LF ){
             retval = findNumericalFluxLF_G( tU1, tU2, tU, tF, tF_, ta_max, alpha, first_valid_G[j], last_valid_G[j], params );
          }
-         if( retval != RET_OK ){
+         if( retval.status != ReturnStatus::OK ){
             ERROUT << "ERROR: methodENOSystem: G numerical flux." << LF;
+            retval.message += "\n! methodENOSystem -> F flux";
             for_break = true;
             break;
          }
@@ -1326,5 +1340,5 @@ int methodENOSystem
       }
    }
 
-   return RET_OK;
+   return { false, ReturnStatus::OK, "" };
 }

@@ -1,7 +1,7 @@
 #include "mhd2d.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int update_dt
+t_status update_dt
    ( double &dt
    , double dt_step
    , const t_params &params
@@ -24,7 +24,7 @@ int update_dt
       if( dt > params.dt_max )
          dt = params.dt_max;
       if( dt < params.dt_min )
-         return RET_ERR_TIME_UNDERFLOW;
+         return { true, ReturnStatus::ErrorTimeUnderflow, "smallest allowed dt does not satisfy CFL condition\n! update_dt" };
    }
 
    if( EPS_EQUAL(dt_old,dt) ){
@@ -32,17 +32,17 @@ int update_dt
          OUT << "*** DEBUG: dt unchanged, dt = " << dt << LF;
 #endif // DEBUG_DT_UPDATE
 //      OUT << "dt stayed at " << dt << ".\n";
-      return RET_NO_CHANGE;
+      return { false, ReturnStatus::NoChange, "" };
    } else {
 #ifdef DEBUG_DT_UPDATE
          OUT << "*** DEBUG: dt updated, dt = " << dt << LF;
 #endif // DEBUG_DT_UPDATE
-      return RET_UPDATED;
+      return { false, ReturnStatus::Updated, "" };
    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int stepRK3TVD
+t_status stepRK3TVD
    ( t_matrices  U
    , double     &dt
    , const t_params &params
@@ -62,7 +62,7 @@ int stepRK3TVD
    bool dt_changed = true;
    bool dt_reduced = false;
    double dt_step, dt_old;
-   int retval;
+   t_status retval;
    while( dt_changed ){
       dt_changed = false;
 
@@ -70,7 +70,7 @@ int stepRK3TVD
       switch( params.scheme ){
       case IntegrationMethod::Undefined:
          ERROUT << "ERROR: stepRK3TVD: Spatial integration method unknown." << LF;
-         return RET_ERR_WRONG_PARAMETER;
+         return { true, ReturnStatus::ErrorWrongParameter, "spatial integration method unknown\n! stepRK3TVD: first step" };
          break;
       case IntegrationMethod::CentralFD:
          retval = methodCentralFD( U, UL, dt_step, params );
@@ -80,16 +80,19 @@ int stepRK3TVD
          retval = methodENOSystem( U, UL, dt_step, params );
          break;
       }
-      if( retval != RET_OK ){
+      if( retval.status != ReturnStatus::OK ){
          ERROUT << "ERROR: stepRK3TVD: First step FD." << LF;
+         retval.message += "\n! stepRK3TVD: first step";
          return retval;
       }
 
       // RK3, first step - update dt
       dt_old = dt;
       retval = update_dt( dt, dt_step, params );
-      if( retval == RET_ERR_TIME_UNDERFLOW )
-         return RET_ERR_TIME_UNDERFLOW;
+      if( retval.status == ReturnStatus::ErrorTimeUnderflow ){
+         retval.message += "\n! stepRK3TVD: first step";
+         return retval;
+      }
       // Take care so dt doesn't rebound upwards (leads into infinite loop)
       if( dt_reduced && dt > dt_old )
          dt = dt_old;
@@ -107,7 +110,7 @@ int stepRK3TVD
       switch( params.scheme ){
       case IntegrationMethod::Undefined:
          ERROUT << "ERROR: stepRK3TVD: Spatial integration method unknown." << LF;
-         return RET_ERR_WRONG_PARAMETER;
+         return { true, ReturnStatus::ErrorWrongParameter, "spatial integration method unknown\n! stepRK3TVD: second step" };
          break;
       case IntegrationMethod::CentralFD:
          retval = methodCentralFD( U1, UL, dt_step, params );
@@ -117,20 +120,23 @@ int stepRK3TVD
          retval = methodENOSystem( U1, UL, dt_step, params );
          break;
       }
-      if( retval != RET_OK ){
+      if( retval.status != ReturnStatus::OK ){
          ERROUT << "ERROR: stepRK3TVD: Second step FD." << LF;
+         retval.message += "\n! stepRK3TVD: second step";
          return retval;
       }
 
       // RK3, second step - update dt
       dt_old = dt;
       retval = update_dt( dt, dt_step, params );
-      if( retval == RET_ERR_TIME_UNDERFLOW )
-         return RET_ERR_TIME_UNDERFLOW;
+      if( retval.status == ReturnStatus::ErrorTimeUnderflow ){
+         retval.message += "\n! stepRK3TVD: second step";
+         return retval;
+      }
       if( dt_reduced && dt > dt_old )
          dt = dt_old;
       else
-         dt_changed = ( retval == RET_UPDATED );
+         dt_changed = ( retval.status == ReturnStatus::Updated );
       if( dt < dt_old ){
          dt_reduced = true;
       }
@@ -146,7 +152,7 @@ int stepRK3TVD
       switch( params.scheme ){
       case IntegrationMethod::Undefined:
          ERROUT << "ERROR: stepRK3TVD: Spatial integration method unknown." << LF;
-         return RET_ERR_WRONG_PARAMETER;
+         return { true, ReturnStatus::ErrorWrongParameter, "spatial integration method unknown\n! stepRK3TVD: last step" };
          break;
       case IntegrationMethod::CentralFD:
          retval = methodCentralFD( U2, UL, dt_step, params );
@@ -156,20 +162,23 @@ int stepRK3TVD
          retval = methodENOSystem( U2, UL, dt_step, params );
          break;
       }
-      if( retval != RET_OK ){
+      if( retval.status != ReturnStatus::OK ){
          ERROUT << "ERROR: stepRK3TVD: Last step FD." << LF;
+         retval.message += "\n! stepRK3TVD: last step";
          return retval;
       }
 
       // RK3, final step - update dt
       dt_old = dt;
       retval = update_dt( dt, dt_step, params );
-      if( retval == RET_ERR_TIME_UNDERFLOW )
-         return RET_ERR_TIME_UNDERFLOW;
+      if( retval.status == ReturnStatus::ErrorTimeUnderflow ){
+         retval.message += "\n! stepRK3TVD: last step";
+         return retval;
+      }
       if( dt_reduced && dt > dt_old )
          dt = dt_old;
       else
-         dt_changed = retval == RET_UPDATED;
+         dt_changed = ( retval.status == ReturnStatus::Updated );
       if( dt < dt_old ){
          dt_reduced = true;
       }
@@ -183,11 +192,11 @@ int stepRK3TVD
    }
 
    // Everything OK
-   return RET_OK;
+   return { false, ReturnStatus::OK, "" };
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int stepEuler
+t_status stepEuler
    ( t_matrices  U
    , double     &dt
    , const t_params &params
@@ -202,13 +211,13 @@ int stepEuler
    }
 
    double dt_step;
-   int retval;
+   t_status retval;
    // Run the method
    switch( params.scheme ){
    case IntegrationMethod::Undefined:
-      ERROUT << "ERROR: stepRK3TVD: Spatial integration method unknown." << LF;
-      return RET_ERR_WRONG_PARAMETER;
-      break;
+      ERROUT << "ERROR: stepEuler: Spatial integration method unknown." << LF;
+         return { true, ReturnStatus::ErrorWrongParameter, "spatial integration method unknown\n! stepEuler" };
+         break;
    case IntegrationMethod::CentralFD:
       retval = methodCentralFD( U, UL, dt_step, params );
       break;
@@ -217,15 +226,18 @@ int stepEuler
       retval = methodENOSystem( U, UL, dt_step, params );
       break;
    }
-   if( retval != RET_OK ){
+   if( retval.status != ReturnStatus::OK ){
       ERROUT << "ERROR: stepEuler: FD." << LF;
+      retval.message += "\n! stepEuler";
       return retval;
    }
 
    // Update dt
    retval = update_dt( dt, dt_step, params );
-   if( retval == RET_ERR_TIME_UNDERFLOW )
-      return RET_ERR_TIME_UNDERFLOW;
+   if( retval.status == ReturnStatus::ErrorTimeUnderflow ){
+      retval.message += "\n! stepEuler";
+      return retval;
+   }
    // Update variables
    for( int k = 0; k < PRB_DIM; k++ )
       for( int i = NXFIRST; i < NXLAST; i++ )
@@ -233,5 +245,5 @@ int stepEuler
             U[k][i][j] = U[k][i][j] + dt*UL[k][i][j];
 
    // Everything OK
-   return RET_OK;
+   return { false, ReturnStatus::OK, "" };
 }

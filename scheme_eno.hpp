@@ -2,14 +2,14 @@
 #define SCHEME_ENO_H_INCLUDED
 
 // Eigenvalues lambda at point U
-int getEigenvalues
+t_status getEigenvalues
    ( double U[PRB_DIM]
    , double gamma
    , double lambda[PRB_DIM]
    , bool   break_on_neg_pressure );
 
 // Eigenvalues lambda at midpoint between U1 and U2
-int getEigenvalues
+t_status getEigenvalues
    ( double U1[PRB_DIM]
    , double U2[PRB_DIM]
    , double gamma
@@ -17,7 +17,7 @@ int getEigenvalues
    , bool   break_on_neg_pressure );
 
 // Eigenvalues / eigenvectors between points 1 (left) and 2 (right) for x-direction flux F
-int getEigens_F
+t_status getEigens_F
    ( double U1[PRB_DIM]
    , double U2[PRB_DIM]
    , double gamma
@@ -27,7 +27,7 @@ int getEigens_F
    , bool   break_on_neg_pressure );
 
 // Eigenvalues / eigenvectors between points 1 (up) and 2 (down) for y-direction flux G
-int getEigens_G
+t_status getEigens_G
    ( double U1[PRB_DIM]
    , double U2[PRB_DIM]
    , double gamma
@@ -49,7 +49,7 @@ void getFluxes
    , const t_params &params );
 
 // Use ENO-Roe method to find numerical flux in the x direction (flux F)
-int findNumericalFluxRoe_F
+t_status findNumericalFluxRoe_F
    ( double  U1[PRB_DIM]
    , double  U2[PRB_DIM]
    , double  F[PRB_DIM][8]
@@ -61,7 +61,7 @@ int findNumericalFluxRoe_F
    , const t_params &params );
 
 // Use ENO-Roe method to find numerical flux in the y direction (flux G)
-int findNumericalFluxRoe_G
+t_status findNumericalFluxRoe_G
    ( double  U1[PRB_DIM]
    , double  U2[PRB_DIM]
    , double  G[PRB_DIM][8]
@@ -73,7 +73,7 @@ int findNumericalFluxRoe_G
    , const t_params &params );
 
 // Use ENO-LF method to find numerical flux in the x direction (flux F)
-int findNumericalFluxLF_F
+t_status findNumericalFluxLF_F
    ( double  U1[PRB_DIM]
    , double  U2[PRB_DIM]
    , double  U[PRB_DIM][8]
@@ -86,7 +86,7 @@ int findNumericalFluxLF_F
    , const t_params &params );
 
 // Use ENO-LF method to find numerical flux in the y direction (flux G)
-int findNumericalFluxLF_G
+t_status findNumericalFluxLF_G
    ( double  U1[PRB_DIM]
    , double  U2[PRB_DIM]
    , double  U[PRB_DIM][8]

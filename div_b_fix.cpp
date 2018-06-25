@@ -126,7 +126,7 @@ void divBCalculation
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int divBCorrectionSOR
+t_status divBCorrectionSOR
    ( t_matrices U
    , const t_params &params
 ){
@@ -385,7 +385,7 @@ int divBCorrectionSOR
 
    // if failed to converge, return error flag
    if( r_max/phi_max > params.divb_sor_rmax ){
-      return RET_ERR_NOT_CONVERGED;
+      return { true, ReturnStatus::ErrorNotConverged, "SOR divergence cleaning failed to converge" };
    }
 
    // correct magnetic field
@@ -399,5 +399,5 @@ int divBCorrectionSOR
    }
 
    // converged, return success flag
-   return RET_OK;
+   return { false, ReturnStatus::OK, "" };
 }
