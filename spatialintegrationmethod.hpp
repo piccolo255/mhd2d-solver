@@ -37,6 +37,9 @@ class SpatialIntegrationMethod
       const int nxTotal;
       const int nyTotal;
 
+      virtual t_status applyBoundaryConditions( t_matrices U
+                                          );
+
    private:
 };
 

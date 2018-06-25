@@ -41,6 +41,8 @@ t_status SpatialMethodCentralFD2::integrate
    double cxmax = 0.0;
    double cymax = 0.0; // maximum wave velocities
 
+   applyBoundaryConditions( U );
+
    // flux F(U), G(U)
    for( int i = 0; i < nxTotal; i++ ){
       for( int j = 0; j < nyTotal; j++ ){
