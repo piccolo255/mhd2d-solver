@@ -28,15 +28,13 @@ endif
 LIBS = 
 
 # Sources
-SRCS = main.cpp conversions.cpp div_b_fix.cpp file_access.cpp scheme_central_fd.cpp scheme_eno.cpp time_steppers.cpp vector_utilities.cpp enums.cpp spatialintegrationmethod.cpp
-HDRS = mhd2d.hpp scheme_eno.hpp vector_utilities.hpp file_access.hpp enums.hpp spatialintegrationmethod.hpp
+SRCS = main.cpp conversions.cpp div_b_fix.cpp file_access.cpp scheme_central_fd.cpp scheme_eno.cpp time_steppers.cpp vector_utilities.cpp enums.cpp
 
 # Object files
 OBJS = $(SRCS:.cpp=.o)
 
 # Dependencies
 DEPS = $(SRCS:.cpp=.d)
--include $(DEPS)
 
 # Default values, to be overwritten from Makefile.local
 INCLUDES = 
@@ -54,13 +52,15 @@ default: all
 all: $(MAIN)
 	@echo Compilation finished.
 
+-include $(DEPS)
+
 # Link object files into executable
 $(MAIN): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(MAIN) $(OBJS) $(LFLAGS) $(LIBS)
 
 # Compile into object files
 .cpp.o:
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $<  -o $@
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -c $< -o $@
 
 # Clean executable, object files and temporary files
 clean:
