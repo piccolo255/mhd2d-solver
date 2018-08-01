@@ -6,14 +6,14 @@
 class SpatialMethodCentralFD2 : public SpatialIntegrationMethod
 {
    public:
-      explicit SpatialMethodCentralFD2( int          nx
-                                     , int          ny
-                                     , int          bufferWidth
-                                     , double       dx
-                                     , double       dy
-                                     , t_boundary   boundary
-                                     , double       gamma
-                                     );
+      explicit SpatialMethodCentralFD2( size_t       nx
+                                      , size_t       ny
+                                      , size_t       bufferWidth
+                                      , double       dx
+                                      , double       dy
+                                      , t_boundary   boundary
+                                      , double       gamma
+                                      );
       virtual ~SpatialMethodCentralFD2();
 
       t_status integrate( t_matrices    U
@@ -21,10 +21,11 @@ class SpatialMethodCentralFD2 : public SpatialIntegrationMethod
                         , double       &ideal_dt
                         ) override;
 
+      static size_t requiredBufferWidth();
    protected:
 
    private:
-      const int requiredBufferWidth = 1;
+      static const size_t minimumBufferWidth = 1;
 
       t_matrices F;
       t_matrices G;

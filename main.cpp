@@ -16,6 +16,16 @@
 
 #include "mhd2d.hpp"
 
+#include <exception>
+#ifdef __linux__
+#include <execinfo.h>
+#endif // __linux__
+
+#include "spatialintegrationmethod.hpp"
+#include "spatialmethodcentralfd2.hpp"
+
+
+
 #ifdef USE_EXCEPTIONS
 /// http://stackoverflow.com/questions/11828539/elegant-exceptionhandling-in-openmp
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -47,11 +57,15 @@ void ThreadException::CaptureException
 }
 #endif // USE_EXCEPTIONS
 
+void defaultExceptionHandler();
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int main
    ( int    argc
    , char **argv
 ){
+   std::set_terminate( defaultExceptionHandler );
+
    namespace nchrono = ::std::chrono;
 
    #ifdef DEBUG
@@ -289,4 +303,26 @@ int main
        << " - Time step average  : " << duration.count()/(step-1) << " seconds.\n";
 
    return 0;
+}
+
+void defaultExceptionHandler
+   (
+){
+   ERROUT << "ERROR: Unhandled exception caught. Aborting.";
+
+   #ifdef __linux__
+      // Print backtrace (Linux only).
+      // Source: https://stackoverflow.com/questions/3355683/c-stack-trace-from-unhandled-exception/3356421#3356421
+      void *trace_elems[20];
+      int trace_elem_count( backtrace( trace_elems, 20 ) );
+      char **stack_syms( backtrace_symbols( trace_elems, trace_elem_count ) );
+
+      ERROUT << "Backtrace:\n";
+      for( int i = 0 ; i < trace_elem_count ; ++i ){
+         ERROUT << i << ": " << stack_syms[i] << "\n";
+      }
+      free( stack_syms );
+   #endif // __linux__
+
+   std::abort();
 }

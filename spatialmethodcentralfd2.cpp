@@ -4,9 +4,9 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 SpatialMethodCentralFD2::SpatialMethodCentralFD2
-   ( int          nx
-   , int          ny
-   , int          bufferWidth
+   ( size_t       nx
+   , size_t       ny
+   , size_t       bufferWidth
    , double       dx
    , double       dy
    , t_boundary   boundary
@@ -14,7 +14,7 @@ SpatialMethodCentralFD2::SpatialMethodCentralFD2
 )
    : SpatialIntegrationMethod{ nx, ny, bufferWidth, dx, dy, boundary, gamma }
 {
-   if( bufferWidth < 1 ){
+   if( bufferWidth < minimumBufferWidth ){
       throw std::domain_error( "Buffer is too small for second order"
                                "central finite difference; need at least 1 extra grid" );
    }
@@ -30,6 +30,14 @@ SpatialMethodCentralFD2::~SpatialMethodCentralFD2
    freeMatrices( F );
    freeMatrices( G );
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+size_t SpatialMethodCentralFD2::requiredBufferWidth
+   (
+){
+   return minimumBufferWidth;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 t_status SpatialMethodCentralFD2::integrate

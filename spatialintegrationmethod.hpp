@@ -6,9 +6,9 @@
 class SpatialIntegrationMethod
 {
    public:
-      explicit SpatialIntegrationMethod( int          nx
-                                       , int          ny
-                                       , int          bufferWidth
+      explicit SpatialIntegrationMethod( size_t       nx
+                                       , size_t       ny
+                                       , size_t       bufferWidth
                                        , double       dx
                                        , double       dy
                                        , t_boundary   boundary
@@ -21,7 +21,11 @@ class SpatialIntegrationMethod
                                 , double       &ideal_dt
                                 ) = 0;
 
+      static size_t requiredBufferWidth();
+
    protected:
+      static const size_t minimumBufferWidth = 0;
+
       const int         nxProblem;
       const int         nyProblem;
       const int         bufferWidth;
