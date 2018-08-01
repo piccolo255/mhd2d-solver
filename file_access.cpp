@@ -533,49 +533,49 @@ void readProblemPlasmaSheet
    double up[PRB_DIM];
    double down[PRB_DIM];
 
-   left[0]      = readEntry<double>( pt, "problem", "rho_l", 0.1 );
-   left[1]      = readEntry<double>( pt, "problem", "u_l",   0.0 );
-   left[2]      = readEntry<double>( pt, "problem", "v_l",   0.0 );
-   left[3]      = readEntry<double>( pt, "problem", "w_l",   0.0 );
-   left[4]      = readEntry<double>( pt, "problem", "Bx_l",  0.0 );
-   left[5]      = readEntry<double>( pt, "problem", "By_l",  0.0 );
-   left[6]      = readEntry<double>( pt, "problem", "Bz_l",  0.0 );
-   left[7]      = readEntry<double>( pt, "problem", "p_l",   0.1 );
+   left[0]  = readEntry<double>( pt, "problem", "rho_l", 0.1 );
+   left[1]  = readEntry<double>( pt, "problem", "u_l",   0.0 );
+   left[2]  = readEntry<double>( pt, "problem", "v_l",   0.0 );
+   left[3]  = readEntry<double>( pt, "problem", "w_l",   0.0 );
+   left[4]  = readEntry<double>( pt, "problem", "Bx_l",  0.0 );
+   left[5]  = readEntry<double>( pt, "problem", "By_l",  0.0 );
+   left[6]  = readEntry<double>( pt, "problem", "Bz_l",  0.0 );
+   left[7]  = readEntry<double>( pt, "problem", "p_l",   0.1 );
 
-   right[0]     = readEntry<double>( pt, "problem", "rho_r", 1.0 );
-   right[1]     = readEntry<double>( pt, "problem", "u_r",   0.0 );
-   right[2]     = readEntry<double>( pt, "problem", "v_r",   0.0 );
-   right[3]     = readEntry<double>( pt, "problem", "w_r",   0.0 );
-   right[4]     = readEntry<double>( pt, "problem", "Bx_r",  0.0 );
-   right[5]     = readEntry<double>( pt, "problem", "By_r",  0.0 );
-   right[6]     = readEntry<double>( pt, "problem", "Bz_r",  0.0 );
-   right[7]     = readEntry<double>( pt, "problem", "p_r",   1.0 );
+   right[0] = readEntry<double>( pt, "problem", "rho_r", 1.0 );
+   right[1] = readEntry<double>( pt, "problem", "u_r",   0.0 );
+   right[2] = readEntry<double>( pt, "problem", "v_r",   0.0 );
+   right[3] = readEntry<double>( pt, "problem", "w_r",   0.0 );
+   right[4] = readEntry<double>( pt, "problem", "Bx_r",  0.0 );
+   right[5] = readEntry<double>( pt, "problem", "By_r",  0.0 );
+   right[6] = readEntry<double>( pt, "problem", "Bz_r",  0.0 );
+   right[7] = readEntry<double>( pt, "problem", "p_r",   1.0 );
 
-   up[0]     = readEntry<double>( pt, "problem", "rho_u", 0.1   );
-   up[1]     = readEntry<double>( pt, "problem", "u_u",   0.0   );
-   up[2]     = readEntry<double>( pt, "problem", "v_u",   0.0   );
-   up[3]     = readEntry<double>( pt, "problem", "w_u",   0.0   );
-   up[4]     = readEntry<double>( pt, "problem", "Bx_u", -0.5   );
-   up[5]     = readEntry<double>( pt, "problem", "By_u",  0.0   );
-   up[6]     = readEntry<double>( pt, "problem", "Bz_u",  0.0   );
-   up[7]     = readEntry<double>( pt, "problem", "p_u",   0.875 );
+   up[0]    = readEntry<double>( pt, "problem", "rho_u", 0.1   );
+   up[1]    = readEntry<double>( pt, "problem", "u_u",   0.0   );
+   up[2]    = readEntry<double>( pt, "problem", "v_u",   0.0   );
+   up[3]    = readEntry<double>( pt, "problem", "w_u",   0.0   );
+   up[4]    = readEntry<double>( pt, "problem", "Bx_u", -0.5   );
+   up[5]    = readEntry<double>( pt, "problem", "By_u",  0.0   );
+   up[6]    = readEntry<double>( pt, "problem", "Bz_u",  0.0   );
+   up[7]    = readEntry<double>( pt, "problem", "p_u",   0.875 );
 
-   down[0]     = readEntry<double>( pt, "problem", "rho_d", 0.1   );
-   down[1]     = readEntry<double>( pt, "problem", "u_d",   0.0   );
-   down[2]     = readEntry<double>( pt, "problem", "v_d",   0.0   );
-   down[3]     = readEntry<double>( pt, "problem", "w_d",   0.0   );
-   down[4]     = readEntry<double>( pt, "problem", "Bx_d",  0.5   );
-   down[5]     = readEntry<double>( pt, "problem", "By_d",  0.0   );
-   down[6]     = readEntry<double>( pt, "problem", "Bz_d",  0.0   );
-   down[7]     = readEntry<double>( pt, "problem", "p_d",   0.875 );
+   down[0]  = readEntry<double>( pt, "problem", "rho_d", 0.1   );
+   down[1]  = readEntry<double>( pt, "problem", "u_d",   0.0   );
+   down[2]  = readEntry<double>( pt, "problem", "v_d",   0.0   );
+   down[3]  = readEntry<double>( pt, "problem", "w_d",   0.0   );
+   down[4]  = readEntry<double>( pt, "problem", "Bx_d",  0.5   );
+   down[5]  = readEntry<double>( pt, "problem", "By_d",  0.0   );
+   down[6]  = readEntry<double>( pt, "problem", "Bz_d",  0.0   );
+   down[7]  = readEntry<double>( pt, "problem", "p_d",   0.875 );
 
    double sheet_start_head = readEntry<double>( pt, "problem", "sheet start", params.start_x+Lx/2 );
    double sheet_start_foot = readEntry<double>( pt, "problem", "sheet start foot", sheet_start_head );
-   double sheet_thickness = readEntry<double>( pt, "problem", "sheet thickness", Ly/2.0 );
+   double sheet_thickness  = readEntry<double>( pt, "problem", "sheet thickness", Ly/2.0 );
 
-   int border_width = (Ly-sheet_thickness)/2.0/params.dy;
-   int uplimit = params.ny-border_width + NYFIRST;
-   int dnlimit = border_width + NYFIRST;
+   int lobe_width = (Ly-sheet_thickness)/2.0/params.dy;
+   int uplimit = NYLAST  - lobe_width;
+   int dnlimit = NYFIRST + lobe_width;
 
    std::vector<int> sheet_start_index(NY);
 

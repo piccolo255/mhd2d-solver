@@ -21,11 +21,6 @@
 #include <execinfo.h>
 #endif // __linux__
 
-#include "spatialintegrationmethod.hpp"
-#include "spatialmethodcentralfd2.hpp"
-
-
-
 #ifdef USE_EXCEPTIONS
 /// http://stackoverflow.com/questions/11828539/elegant-exceptionhandling-in-openmp
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
