@@ -758,6 +758,24 @@ void readProblemPlasmaSheet
             U_p[i][j] = ptot - mag_pressure( U_bx[i][j], U_by[i][j], U_bz[i][j] );
          }
       }
+
+      // apply transitions to the left sheet-right sheet boundary
+      for( int p = 0; p < transition_points; p++ ){
+         for( int j = dnlimit; j < uplimit; j++ ){
+            int i = sheet_start_index[j] - (transition_points/2) + p;
+            int i_left = sheet_start_index[j] - (transition_points/2) - 1;
+            int i_rght = sheet_start_index[j] + (transition_points/2);
+
+            for( auto &v: U_natural ){
+               v[i][j] = combine( transition_coef[p], v[i_left][j], v[i_rght][j] );
+            }
+            // fix pressure
+            double ptot_left = U_p[i_left][j] + mag_pressure( U_bx[i_left][j], U_by[i_left][j], U_bz[i_left][j] );
+            double ptot_rght = U_p[i_rght][j] + mag_pressure( U_bx[i_rght][j], U_by[i_rght][j], U_bz[i_rght][j] );
+            double ptot = combine( transition_coef[p], ptot_left, ptot_rght );
+            U_p[i][j] = ptot - mag_pressure( U_bx[i][j], U_by[i][j], U_bz[i][j] );
+         }
+      }
    }
 
    toConservationData( params, data );
