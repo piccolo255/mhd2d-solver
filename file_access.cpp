@@ -718,10 +718,6 @@ void readProblemPlasmaSheet
          exit( RET_ERR_WRONG_PARAMETER );
       }
 
-      for( const auto &p: transition_coef ){
-         std::cout << p << " ";
-      }
-
       // apply transitions to the sheet-lobe boundary
       int dn_btm = dnlimit - transition_points - 1; // start of transition around dnlimit
       int dn_top = dnlimit + transition_points;     // end of transition around dnlimit
