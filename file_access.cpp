@@ -689,6 +689,79 @@ void readProblemPlasmaSheet
       }
    }
 
+   std::string transition_type = readEntry<std::string>( pt, "problem", "transition type", "jump" );
+   if( transition_type == "jump" ){
+      // nothing to do
+   } else {
+      int transition_points = 2*readEntry<int>( pt, "problem", "transition points", 1 );
+
+      // prepare transition coefficients
+      std::vector<double> transition_coef( transition_points );
+      if( transition_type == "linear" ){
+         double diff = 1.0/transition_points;
+         for( int i = 0; i < transition_points; i++ ){
+            transition_coef[i] = (transition_points-i - 0.5)*diff;
+         }
+      } else {
+         ERROUT << "ERROR: readProblemPlasmaSheet: in section [problem], key \"transition type\":\n"
+                << "       Unknown transition type: " << tempstr << LF;
+         exit( RET_ERR_WRONG_PARAMETER );
+      }
+
+      for( const auto &p: transition_coef ){
+         std::cout << p << " ";
+      }
+
+      // apply transitions to the sheet-lobe boundary
+      int dn_btm = dnlimit - transition_points - 1; // start of transition around dnlimit
+      int dn_top = dnlimit + transition_points;     // end of transition around dnlimit
+      int up_btm = uplimit - transition_points - 1; // start of transition around uplimit
+      int up_top = uplimit + transition_points;     // end of transition around uplimit
+      auto mag_pressure = []( double bx, double by, double bz ){
+         return 0.5*(bx*bx+by*by+bz*bz);
+      };
+      auto combine = []( double coef, double first, double second ){
+         return coef*first + (1.0-coef)*second;
+      };
+
+      for( int i = NXFIRST; i < NXLAST; i++ ){
+         double ptot_dn_btm = data.p[i][dn_btm] + mag_pressure( data.U[4][i][dn_btm], data.U[5][i][dn_btm], data.U[6][i][dn_btm] );
+         double ptot_dn_top = data.p[i][dn_top] + mag_pressure( data.U[4][i][dn_top], data.U[5][i][dn_top], data.U[6][i][dn_top] );
+         double ptot_up_btm = data.p[i][up_btm] + mag_pressure( data.U[4][i][up_btm], data.U[5][i][up_btm], data.U[6][i][up_btm] );
+         double ptot_up_top = data.p[i][up_top] + mag_pressure( data.U[4][i][up_top], data.U[5][i][up_top], data.U[6][i][up_top] );
+
+         // transition around dnlimit
+         for( int p = 0; p < transition_points; p++ ){
+            int j = dnlimit - (transition_points/2) + p;
+            data.U[0][i][j] = combine( transition_coef[p], data.U[0][i][dn_btm], data.U[0][i][dn_top] );
+            data.u[0][i][j] = combine( transition_coef[p], data.u[0][i][dn_btm], data.u[0][i][dn_top] );
+            data.u[1][i][j] = combine( transition_coef[p], data.u[1][i][dn_btm], data.u[1][i][dn_top] );
+            data.u[2][i][j] = combine( transition_coef[p], data.u[2][i][dn_btm], data.u[2][i][dn_top] );
+            data.U[4][i][j] = combine( transition_coef[p], data.U[4][i][dn_btm], data.U[4][i][dn_top] );
+            data.U[5][i][j] = combine( transition_coef[p], data.U[5][i][dn_btm], data.U[5][i][dn_top] );
+            data.U[6][i][j] = combine( transition_coef[p], data.U[6][i][dn_btm], data.U[6][i][dn_top] );
+            // pressure
+            double ptot = combine( transition_coef[p], ptot_dn_btm, ptot_dn_top );
+            data.p[i][j] = ptot - mag_pressure( data.U[4][i][j], data.U[5][i][j], data.U[6][i][j] );
+         }
+
+         // transition around uplimit
+         for( int p = 0; p < transition_points; p++ ){
+            int j = uplimit - (transition_points/2) + p;
+            data.U[0][i][j] = combine( transition_coef[p], data.U[0][i][up_btm], data.U[0][i][up_top] );
+            data.u[0][i][j] = combine( transition_coef[p], data.u[0][i][up_btm], data.u[0][i][up_top] );
+            data.u[1][i][j] = combine( transition_coef[p], data.u[1][i][up_btm], data.u[1][i][up_top] );
+            data.u[2][i][j] = combine( transition_coef[p], data.u[2][i][up_btm], data.u[2][i][up_top] );
+            data.U[4][i][j] = combine( transition_coef[p], data.U[4][i][up_btm], data.U[4][i][up_top] );
+            data.U[5][i][j] = combine( transition_coef[p], data.U[5][i][up_btm], data.U[5][i][up_top] );
+            data.U[6][i][j] = combine( transition_coef[p], data.U[6][i][up_btm], data.U[6][i][up_top] );
+            // pressure
+            double ptot = combine( transition_coef[p], ptot_up_btm, ptot_up_top );
+            data.p[i][j] = ptot - mag_pressure( data.U[4][i][j], data.U[5][i][j], data.U[6][i][j] );
+         }
+      }
+   }
+
    toConservationData( params, data );
 
    std::vector<std::string> boundary_name(params.b_count);
