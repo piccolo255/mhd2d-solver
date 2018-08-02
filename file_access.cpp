@@ -528,6 +528,16 @@ void readProblemPlasmaSheet
    params.start_x = readEntry<double>( pt, "problem", "start_x", 0.0 );
    params.start_y = readEntry<double>( pt, "problem", "start_y", 0.0 );
 
+   std::vector<t_matrix> U_natural = { data.U[0], data.u[0], data.u[1], data.u[2], data.U[4], data.U[5], data.U[6], data.p };
+   t_matrix U_rho = data.U[0];
+   t_matrix U_u   = data.u[0];
+   t_matrix U_v   = data.u[1];
+   t_matrix U_w   = data.u[2];
+   t_matrix U_bx  = data.U[4];
+   t_matrix U_by  = data.U[5];
+   t_matrix U_bz  = data.U[6];
+   t_matrix U_p   = data.p;
+
    double left[PRB_DIM];
    double right[PRB_DIM];
    double up[PRB_DIM];
@@ -594,45 +604,45 @@ void readProblemPlasmaSheet
    if( sheet_profile == "constant" ){
       for( int i = NXFIRST; i < NXLAST; i++ ){
          for( int j = NYFIRST; j < dnlimit; j++ ){
-            data.U[0][i][j] = down[0];
-            data.u[0][i][j] = down[1];
-            data.u[1][i][j] = down[2];
-            data.u[2][i][j] = down[3];
-            data.U[4][i][j] = down[4];
-            data.U[5][i][j] = down[5];
-            data.U[6][i][j] = down[6];
-            data.p[i][j]    = down[7];
+            U_rho[i][j] = down[0];
+            U_u  [i][j] = down[1];
+            U_v  [i][j] = down[2];
+            U_w  [i][j] = down[3];
+            U_bx [i][j] = down[4];
+            U_by [i][j] = down[5];
+            U_bz [i][j] = down[6];
+            U_p  [i][j] = down[7];
          }
          for( int j = dnlimit; j < uplimit; j++ ){
             if( i < sheet_start_index[j] ){
-               data.U[0][i][j] = left[0];
-               data.u[0][i][j] = left[1];
-               data.u[1][i][j] = left[2];
-               data.u[2][i][j] = left[3];
-               data.U[4][i][j] = left[4];
-               data.U[5][i][j] = left[5];
-               data.U[6][i][j] = left[6];
-               data.p[i][j]    = left[7];
+               U_rho[i][j] = left[0];
+               U_u  [i][j] = left[1];
+               U_v  [i][j] = left[2];
+               U_w  [i][j] = left[3];
+               U_bx [i][j] = left[4];
+               U_by [i][j] = left[5];
+               U_bz [i][j] = left[6];
+               U_p  [i][j] = left[7];
             } else {
-               data.U[0][i][j] = right[0];
-               data.u[0][i][j] = right[1];
-               data.u[1][i][j] = right[2];
-               data.u[2][i][j] = right[3];
-               data.U[4][i][j] = right[4];
-               data.U[5][i][j] = right[5];
-               data.U[6][i][j] = right[6];
-               data.p[i][j]    = right[7];
+               U_rho[i][j] = right[0];
+               U_u  [i][j] = right[1];
+               U_v  [i][j] = right[2];
+               U_w  [i][j] = right[3];
+               U_bx [i][j] = right[4];
+               U_by [i][j] = right[5];
+               U_bz [i][j] = right[6];
+               U_p  [i][j] = right[7];
             }
          }
          for( int j = uplimit; j < NYLAST; j++ ){
-            data.U[0][i][j] = up[0];
-            data.u[0][i][j] = up[1];
-            data.u[1][i][j] = up[2];
-            data.u[2][i][j] = up[3];
-            data.U[4][i][j] = up[4];
-            data.U[5][i][j] = up[5];
-            data.U[6][i][j] = up[6];
-            data.p[i][j]    = up[7];
+            U_rho[i][j] = up[0];
+            U_u  [i][j] = up[1];
+            U_v  [i][j] = up[2];
+            U_w  [i][j] = up[3];
+            U_bx [i][j] = up[4];
+            U_by [i][j] = up[5];
+            U_bz [i][j] = up[6];
+            U_p  [i][j] = up[7];
          }
       }
    } else if( sheet_profile == "tanh" ){
@@ -641,50 +651,50 @@ void readProblemPlasmaSheet
 
       for( int i = NXFIRST; i < NXLAST; i++ ){
          for( int j = NYFIRST; j < dnlimit; j++ ){
-            data.U[0][i][j] = down[0];
-            data.u[0][i][j] = down[1];
-            data.u[1][i][j] = down[2];
-            data.u[2][i][j] = down[3];
-            data.U[4][i][j] = down[4];
-            data.U[5][i][j] = down[5];
-            data.U[6][i][j] = down[6];
-            data.p[i][j]    = down[7];
+            U_rho[i][j] = down[0];
+            U_u  [i][j] = down[1];
+            U_v  [i][j] = down[2];
+            U_w  [i][j] = down[3];
+            U_bx [i][j] = down[4];
+            U_by [i][j] = down[5];
+            U_bz [i][j] = down[6];
+            U_p  [i][j] = down[7];
          }
          for( int j = dnlimit; j < uplimit; j++ ){
             // tanh(y) profile for B, with -1 <= y <= 1
             double coef_b = tanh( 2.0*(j-dnlimit)/((uplimit-1)-dnlimit) - 1.0 );
 
             if( i < sheet_start_index[j] ){
-               data.U[0][i][j] = left[0];
-               data.u[0][i][j] = left[1];
-               data.u[1][i][j] = left[2];
-               data.u[2][i][j] = left[3];
-               data.U[4][i][j] = left[4]*coef_b;
-               data.U[5][i][j] = left[5]*coef_b;
-               data.U[6][i][j] = left[6]*coef_b;
+               U_rho[i][j] = left[0];
+               U_u  [i][j] = left[1];
+               U_v  [i][j] = left[2];
+               U_w  [i][j] = left[3];
+               U_bx [i][j] = left[4]*coef_b;
+               U_by [i][j] = left[5]*coef_b;
+               U_bz [i][j] = left[6]*coef_b;
                // calculate pressure so that total pressure is kept constant
-               data.p[i][j]    = left[7] + 0.5*left_bb*(1.0-coef_b*coef_b);
+               U_p[i][j] = left[7] + 0.5*left_bb*(1.0-coef_b*coef_b);
             } else {
-               data.U[0][i][j] = right[0];
-               data.u[0][i][j] = right[1];
-               data.u[1][i][j] = right[2];
-               data.u[2][i][j] = right[3];
-               data.U[4][i][j] = right[4]*coef_b;
-               data.U[5][i][j] = right[5]*coef_b;
-               data.U[6][i][j] = right[6]*coef_b;
+               U_rho[i][j] = right[0];
+               U_u  [i][j] = right[1];
+               U_v  [i][j] = right[2];
+               U_w  [i][j] = right[3];
+               U_bx [i][j] = right[4]*coef_b;
+               U_by [i][j] = right[5]*coef_b;
+               U_bz [i][j] = right[6]*coef_b;
                // calculate pressure so that total pressure is kept constant
-               data.p[i][j]    = right[7] + 0.5*right_bb*(1.0-coef_b*coef_b);
+               U_p[i][j] = right[7] + 0.5*right_bb*(1.0-coef_b*coef_b);
             }
          }
          for( int j = uplimit; j < NYLAST; j++ ){
-            data.U[0][i][j] = up[0];
-            data.u[0][i][j] = up[1];
-            data.u[1][i][j] = up[2];
-            data.u[2][i][j] = up[3];
-            data.U[4][i][j] = up[4];
-            data.U[5][i][j] = up[5];
-            data.U[6][i][j] = up[6];
-            data.p[i][j]    = up[7];
+            U_rho[i][j] = up[0];
+            U_u  [i][j] = up[1];
+            U_v  [i][j] = up[2];
+            U_w  [i][j] = up[3];
+            U_bx [i][j] = up[4];
+            U_by [i][j] = up[5];
+            U_bz [i][j] = up[6];
+            U_p  [i][j] = up[7];
          }
       }
    }
@@ -725,39 +735,31 @@ void readProblemPlasmaSheet
       };
 
       for( int i = NXFIRST; i < NXLAST; i++ ){
-         double ptot_dn_btm = data.p[i][dn_btm] + mag_pressure( data.U[4][i][dn_btm], data.U[5][i][dn_btm], data.U[6][i][dn_btm] );
-         double ptot_dn_top = data.p[i][dn_top] + mag_pressure( data.U[4][i][dn_top], data.U[5][i][dn_top], data.U[6][i][dn_top] );
-         double ptot_up_btm = data.p[i][up_btm] + mag_pressure( data.U[4][i][up_btm], data.U[5][i][up_btm], data.U[6][i][up_btm] );
-         double ptot_up_top = data.p[i][up_top] + mag_pressure( data.U[4][i][up_top], data.U[5][i][up_top], data.U[6][i][up_top] );
+         double ptot_dn_btm = U_p[i][dn_btm] + mag_pressure( U_bx[i][dn_btm], U_by[i][dn_btm], U_bz[i][dn_btm] );
+         double ptot_dn_top = U_p[i][dn_top] + mag_pressure( U_bx[i][dn_top], U_by[i][dn_top], U_bz[i][dn_top] );
+         double ptot_up_btm = U_p[i][up_btm] + mag_pressure( U_bx[i][up_btm], U_by[i][up_btm], U_bz[i][up_btm] );
+         double ptot_up_top = U_p[i][up_top] + mag_pressure( U_bx[i][up_top], U_by[i][up_top], U_bz[i][up_top] );
 
          // transition around dnlimit
          for( int p = 0; p < transition_points; p++ ){
             int j = dnlimit - (transition_points/2) + p;
-            data.U[0][i][j] = combine( transition_coef[p], data.U[0][i][dn_btm], data.U[0][i][dn_top] );
-            data.u[0][i][j] = combine( transition_coef[p], data.u[0][i][dn_btm], data.u[0][i][dn_top] );
-            data.u[1][i][j] = combine( transition_coef[p], data.u[1][i][dn_btm], data.u[1][i][dn_top] );
-            data.u[2][i][j] = combine( transition_coef[p], data.u[2][i][dn_btm], data.u[2][i][dn_top] );
-            data.U[4][i][j] = combine( transition_coef[p], data.U[4][i][dn_btm], data.U[4][i][dn_top] );
-            data.U[5][i][j] = combine( transition_coef[p], data.U[5][i][dn_btm], data.U[5][i][dn_top] );
-            data.U[6][i][j] = combine( transition_coef[p], data.U[6][i][dn_btm], data.U[6][i][dn_top] );
-            // pressure
+            for( auto &v: U_natural ){
+               v[i][j] = combine( transition_coef[p], v[i][dn_btm], v[i][dn_top] );
+            }
+            // fix pressure
             double ptot = combine( transition_coef[p], ptot_dn_btm, ptot_dn_top );
-            data.p[i][j] = ptot - mag_pressure( data.U[4][i][j], data.U[5][i][j], data.U[6][i][j] );
+            U_p[i][j] = ptot - mag_pressure( U_bx[i][j], U_by[i][j], U_bz[i][j] );
          }
 
          // transition around uplimit
          for( int p = 0; p < transition_points; p++ ){
             int j = uplimit - (transition_points/2) + p;
-            data.U[0][i][j] = combine( transition_coef[p], data.U[0][i][up_btm], data.U[0][i][up_top] );
-            data.u[0][i][j] = combine( transition_coef[p], data.u[0][i][up_btm], data.u[0][i][up_top] );
-            data.u[1][i][j] = combine( transition_coef[p], data.u[1][i][up_btm], data.u[1][i][up_top] );
-            data.u[2][i][j] = combine( transition_coef[p], data.u[2][i][up_btm], data.u[2][i][up_top] );
-            data.U[4][i][j] = combine( transition_coef[p], data.U[4][i][up_btm], data.U[4][i][up_top] );
-            data.U[5][i][j] = combine( transition_coef[p], data.U[5][i][up_btm], data.U[5][i][up_top] );
-            data.U[6][i][j] = combine( transition_coef[p], data.U[6][i][up_btm], data.U[6][i][up_top] );
-            // pressure
+            for( auto &v: U_natural ){
+               v[i][j] = combine( transition_coef[p], v[i][up_btm], v[i][up_top] );
+            }
+            // fix pressure
             double ptot = combine( transition_coef[p], ptot_up_btm, ptot_up_top );
-            data.p[i][j] = ptot - mag_pressure( data.U[4][i][j], data.U[5][i][j], data.U[6][i][j] );
+            U_p[i][j] = ptot - mag_pressure( U_bx[i][j], U_by[i][j], U_bz[i][j] );
          }
       }
    }
