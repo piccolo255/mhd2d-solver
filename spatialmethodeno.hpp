@@ -22,6 +22,9 @@ class SpatialMethodEno : public SpatialIntegrationMethod
       bool breakOnNegativePressure  = false;
       bool shownPressureWarning     = false;
 
+      t_matrices F;
+      t_matrices G;
+
       // Calculate horizontal and vertical physical fluxes, F and G, from physical values U
       void updateFluxes( const t_matrices U );
 
@@ -48,9 +51,6 @@ class SpatialMethodEno : public SpatialIntegrationMethod
 
    private:
       static const size_t minimumBufferWidth = 2;
-
-      t_matrices F;
-      t_matrices G;
 };
 
 #endif // SPATIALMETHODCENTRALFD_HPP

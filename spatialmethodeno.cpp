@@ -74,8 +74,8 @@ void SpatialMethodEno::updateFluxes
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 t_status SpatialMethodEno::getEigenvaluesAt
-   ( const double U[8]
-   , double       lambda[8]
+   ( const double U[PRB_DIM]
+   , double       lambda[PRB_DIM]
 ){
    auto status = t_status{ false, ReturnStatus::OK, std::string{} };
 
@@ -153,9 +153,9 @@ t_status SpatialMethodEno::getEigenvaluesAt
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 t_status SpatialMethodEno::getEigenvaluesBetween
-   ( const double U1[8]
-   , const double U2[8]
-   , double       lambda[8])
+   ( const double U1[PRB_DIM]
+   , const double U2[PRB_DIM]
+   , double       lambda[PRB_DIM])
 {
    auto status = t_status{ false, ReturnStatus::OK, std::string{} };
 
@@ -232,11 +232,11 @@ t_status SpatialMethodEno::getEigenvaluesBetween
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 t_status SpatialMethodEno::getEigensF
-   ( double U1[8]
-   , double U2[8]
-   , double lambda[8]
-   , double lv[8][8]
-   , double rv[8][8]
+   ( double U1[PRB_DIM]
+   , double U2[PRB_DIM]
+   , double lambda[PRB_DIM]
+   , double lv[PRB_DIM][PRB_DIM]
+   , double rv[PRB_DIM][PRB_DIM]
 ){
    auto status = t_status{ false, ReturnStatus::OK, std::string{} };
 
@@ -518,11 +518,11 @@ t_status SpatialMethodEno::getEigensF
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 t_status SpatialMethodEno::getEigensG
-   ( double U1[8]
-   , double U2[8]
-   , double lambda[8]
-   , double lv[8][8]
-   , double rv[8][8]
+   ( double U1[PRB_DIM]
+   , double U2[PRB_DIM]
+   , double lambda[PRB_DIM]
+   , double lv[PRB_DIM][PRB_DIM]
+   , double rv[PRB_DIM][PRB_DIM]
 ){
    // invert x and y axis
    std::swap( U1[1], U1[2] ); std::swap( U2[1], U2[2] );
