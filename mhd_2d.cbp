@@ -95,6 +95,8 @@
 		<Unit filename="spatialmethodcentralfd2.hpp" />
 		<Unit filename="spatialmethodeno.cpp" />
 		<Unit filename="spatialmethodeno.hpp" />
+		<Unit filename="spatialmethodenoroe.cpp" />
+		<Unit filename="spatialmethodenoroe.hpp" />
 		<Unit filename="time_steppers.cpp" />
 		<Unit filename="timeintegrationeuler.cpp" />
 		<Unit filename="timeintegrationeuler.hpp" />
