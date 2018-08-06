@@ -28,11 +28,3 @@ SpatialMethodEno::~SpatialMethodEno
    freeMatrices( F );
    freeMatrices( G );
 }
-
-t_status SpatialMethodEno::integrate
-   ( t_matrices   U
-   , t_matrices   UL
-   , double      &ideal_dt
-){
-   return { true, ReturnStatus::ErrorNotImplemented, "ENO method not yet implemented" };
-}
