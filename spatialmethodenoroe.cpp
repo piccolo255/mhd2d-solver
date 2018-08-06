@@ -38,16 +38,16 @@ t_status SpatialMethodEnoRoe::integrate
    // for processing function return values
    auto status = t_status{};
    // track maximum wave speeds (i.e., eigenvalues)
-   double maxWaveSpeedX = 0.0;
-   double maxWaveSpeedY = 0.0;
+   auto maxWaveSpeedX = double{0.0};
+   auto maxWaveSpeedY = double{0.0};
 
    // temporary storage for function calls
-   const int TN      = 8;
-   const int TNFIRST = 2;
-   //const int TNLAST  = 6;
+   const auto TN      = size_t{8};
+   const auto TNFIRST = size_t{2};
+   //const auto TNLAST  = size_t{6};
    double tU1[PRB_DIM], tU2[PRB_DIM];
    double tF[PRB_DIM][TN], tVUF[PRB_DIM][TN-1], tF_[PRB_DIM];
-   double tMaxWaveSpeed;
+   auto tMaxWaveSpeed = double{};
 
    // first, boundary conditions
    status = applyBoundaryConditions( U );
@@ -191,6 +191,7 @@ t_status SpatialMethodEnoRoe::getNumericalFluxF
    double w[PRB_DIM][8], Vw[PRB_DIM][7];
    // fluxes on minus edge, plus edge, and final
    double wm[PRB_DIM], wp[PRB_DIM], fw[PRB_DIM];
+
    // maximum wave speed (i.e., eigenvalue)
    maxWaveSpeed = 0.0;
 
@@ -199,6 +200,8 @@ t_status SpatialMethodEnoRoe::getNumericalFluxF
    if( status.status != ReturnStatus::OK ){
       status.message += "\n! SpatialMethodEnoRoe::getNumericalFluxF";
    }
+   if( status.isError )
+      return status;
 
    // update maximum wave speed
    for( auto k = size_t{0}; k < PRB_DIM; k++ ){
