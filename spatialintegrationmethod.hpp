@@ -1,5 +1,5 @@
-#ifndef SPATIALINTEGRATIONMETHOD_H
-#define SPATIALINTEGRATIONMETHOD_H
+#ifndef SPATIALINTEGRATIONMETHOD_HPP
+#define SPATIALINTEGRATIONMETHOD_HPP
 
 #include "mhd2d.hpp"
 
@@ -26,9 +26,9 @@ class SpatialIntegrationMethod
    protected:
       static const size_t minimumBufferWidth = 0;
 
-      const size_t         nxProblem;
-      const size_t         nyProblem;
-      const size_t         bufferWidth;
+      const size_t      nxProblem;
+      const size_t      nyProblem;
+      const size_t      bufferWidth;
       const double      dx;
       const double      dy;
       const t_boundary  boundary;
@@ -42,9 +42,9 @@ class SpatialIntegrationMethod
       const size_t nyTotal;
 
       virtual t_status applyBoundaryConditions( t_matrices U
-                                          );
+                                              );
 
    private:
 };
 
-#endif // SPATIALINTEGRATIONMETHOD_H
+#endif // SPATIALINTEGRATIONMETHOD_HPP
