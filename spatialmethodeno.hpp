@@ -19,16 +19,19 @@ class SpatialMethodEno : public SpatialIntegrationMethod
       static size_t requiredBufferWidth();
 
    protected:
+      bool breakOnNegativePressure  = false;
+      bool shownPressureWarning     = false;
+
       // Calculate horizontal and vertical physical fluxes, F and G, from physical values U
       void updateFluxes( const t_matrices U );
 
       // Eigenvalues lambda at point U
-      t_status getEigenvaluesAt( const double U[PRB_DIM]
-                               , double lambda[PRB_DIM] );
+      t_status getEigenvaluesAt( const double   U[PRB_DIM]
+                               , double         lambda[PRB_DIM] );
       // Eigenvalues lambda at midpoint between U1 and U2
       t_status getEigenvaluesBetween( const double U1[PRB_DIM]
                                     , const double U2[PRB_DIM]
-                                    , double lambda[PRB_DIM] );
+                                    , double       lambda[PRB_DIM] );
 
       // Eigenvalues / eigenvectors between points 1 (left) and 2 (right) for x-direction flux F
       t_status getEigensF( double U1[PRB_DIM]

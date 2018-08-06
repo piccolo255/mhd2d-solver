@@ -18,7 +18,7 @@ t_status getEigenvalues
    double bz = U[6];
    double e  = U[7];
 
-   if( r < 0.0 ){
+   if( r <= 0.0 ){
       ERROUT << "ERROR: getEigenvalues: Negative density encountered!\n"
              << "       The simulation will now terminate." << LF;
       return { true, ReturnStatus::ErrorNegativeDensity, "negative density encountered\n! getEigenvalues" };
@@ -93,7 +93,7 @@ t_status getEigenvalues
    double bz = 0.5 * ( U1[6] + U2[6] );
 
    if( r <= 0.0 ){
-      ERROUT << "ERROR: getEigens_F: Negative density encountered!\n"
+      ERROUT << "ERROR: getEigenvalues: Negative density encountered!\n"
              << "       The simulation will now terminate." << LF;
       return { true, ReturnStatus::ErrorNegativeDensity, "negative density encountered\n! getEigenvalues" };
    }
@@ -114,10 +114,10 @@ t_status getEigenvalues
    double p = ptot - 0.5*bb;
    if( p < 0.0 ){
       if( break_on_neg_pressure ){
-         ERROUT << "ERROR: getEigens_F: Negative pressure encountered!" << LF;
+         ERROUT << "ERROR: getEigenvalues: Negative pressure encountered!" << LF;
          return { true, ReturnStatus::ErrorNegativePressure, "negative pressure encountered\n! getEigenvalues" };
       } else {
-         ERROUT << "WARNING: getEigens_F: Negative pressure encountered!\n"
+         ERROUT << "WARNING: getEigenvalues: Negative pressure encountered!\n"
                 << "         Results from this point on are suspect.\n"
                 << "         Simulation resumed with pressure forced to zero." << LF;
          p = 0.0;
