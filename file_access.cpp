@@ -14,8 +14,9 @@ void openFile
          output.file = fopen( output.filename.c_str(), "w" );
       }
       if( !output.file ){
-         ERROUT << "ERROR: openFile: Unable to open file '" << output.filename << "' for writing." << LF;
-         exit( RET_ERR_FILE_NOT_FOUND );
+         criticalError( ReturnStatus::ErrorFileNotFound, std::string{}
+                      + "openFile: Unable to open file '"
+                      + output.filename + "' for writing." );
       }
    }
 }
@@ -69,8 +70,8 @@ void inputData
    try {
       nptree::read_ini( filename, pt );
    } catch( std::exception &e ) {
-      ERROUT << "ERROR: inputData: " << e.what() << LF;
-      exit( RET_ERR_PROPERTY_TREE );
+      criticalError( ReturnStatus::ErrorFailedToParse, std::string{}
+                   + "inputData: " + e.what() );
    }
 
    // Global problem parameters
@@ -92,9 +93,9 @@ void inputData
    params.time_mode = fromString<TimeStepMode>( tempstr );
    switch( params.time_mode ){
    case TimeStepMode::Undefined:
-      ERROUT << "ERROR: inputData: in section [time], key \"mode\":\n"
-             << "       Unknown time stepping mode: " << tempstr << LF;
-      exit( RET_ERR_WRONG_PARAMETER );
+      criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                   + "inputData: in section [time], key \"mode\":\n"
+                   + "Unknown time stepping mode: " + tempstr );
       break;
    case TimeStepMode::Constant:
       params.steps  = readEntry<int>   ( pt, "time", "steps", 8     );
@@ -126,9 +127,9 @@ void inputData
    } else if( tempstr == "plasma sheet" ){
       readProblemPlasmaSheet( pt, params, data );
    } else {
-      ERROUT << "ERROR: inputData: in section [problem], key \"type\":\n"
-             << "       Unknown problem type: " << tempstr << LF;
-      exit( RET_ERR_WRONG_PARAMETER );
+      criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                   + "inputData: in section [problem], key \"type\":\n"
+                   + "Unknown problem type: " + tempstr );
    }
 
    // Negative pressure handling
@@ -138,18 +139,18 @@ void inputData
    tempstr = readEntry<std::string>( pt, "problem", "time method", "rk3" );
    params.time_stepping = fromString<TimeStepMethod>( tempstr );
    if( params.time_stepping == TimeStepMethod::Undefined ){
-      ERROUT << "ERROR: inputData: in section [problem], key \"time method\":\n"
-             << "       Unknown time stepping method: " << tempstr << LF;
-      exit( RET_ERR_WRONG_PARAMETER );
+      criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                   + "inputData: in section [problem], key \"time method\":\n"
+                   + "Unknown time stepping method: " + tempstr );
    }
 
    // Space integration method
    tempstr = readEntry<std::string>( pt, "problem", "space method", "eno-roe" );
    params.scheme = fromString<IntegrationMethod>( tempstr );
    if( params.scheme == IntegrationMethod::Undefined ){
-      ERROUT << "ERROR: inputData: in section [problem], key \"space method\":\n"
-             << "       Unknown space integration method: " << tempstr << LF;
-      exit( RET_ERR_WRONG_PARAMETER );
+      criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                   + "inputData: in section [problem], key \"space method\":\n"
+                   + "Unknown space integration method: " + tempstr );
    }
 
    // Data output file
@@ -175,9 +176,9 @@ void inputData
    output_grid.skip_mode = fromString<WriteSkipMode>( tempstr );
    switch( output_grid.skip_mode ){
    case WriteSkipMode::Undefined:
-      ERROUT << "ERROR: inputData: in section [output grid], key \"mode\":\n"
-             << "       Unknown output mode: " << tempstr << LF;
-      exit( RET_ERR_WRONG_PARAMETER );
+      criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                   + "inputData: in section [output grid], key \"mode\":\n"
+                   + "Unknown output mode: " + tempstr );
       break;
    case WriteSkipMode::Step:
       output_grid.skip_steps = readEntry<int>( pt, "output grid", "skip steps", 1 );
@@ -194,9 +195,9 @@ void inputData
    output_non_grid.skip_mode = fromString<WriteSkipMode>( tempstr );
    switch( output_non_grid.skip_mode ){
    case WriteSkipMode::Undefined:
-      ERROUT << "ERROR: inputData: in section [output non grid], key \"mode\":\n"
-             << "       Unknown output mode: " << tempstr << LF;
-      exit( RET_ERR_WRONG_PARAMETER );
+      criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                   + "inputData: in section [output non grid], key \"mode\":\n"
+                   + "Unknown output mode: " + tempstr );
       break;
    case WriteSkipMode::Step:
       output_non_grid.skip_steps = readEntry<int>( pt, "output non grid", "skip steps", 1 );
@@ -264,9 +265,9 @@ void readParamsDivBCorrector
    params.divb_method = fromString<DivBCorrectionMethod>( tempstr );
    switch( params.divb_method ){
    case DivBCorrectionMethod::Undefined:
-      ERROUT << "ERROR: readParamsDivBCorrector: in section [divb corrector], key \"method\":\n"
-             << "       Unknown correction method:" << tempstr << LF;
-      exit( RET_ERR_WRONG_PARAMETER );
+      criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                   + "readParamsDivBCorrector: in section [divb corrector], key \"method\":\n"
+                   + "Unknown correction method:" + tempstr );
       break;
    case DivBCorrectionMethod::SOR:
       params.divb_sor_rsteps = readEntry<double>( pt, "divb corrector", "sor rsteps",  0       );
@@ -365,14 +366,14 @@ void readProblemShockTube
       params.boundary[b] = fromString<BoundaryCondition>( tempstr );
       switch( params.boundary[b] ){
       case BoundaryCondition::Undefined:
-         ERROUT << "ERROR: readProblemShockTube: in section [problem], key \"" << boundary_key << "\":\n"
-                << "       Unknown boundary condition: " << tempstr << LF;
-         exit( RET_ERR_WRONG_PARAMETER );
+         criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                      + "readProblemShockTube: in section [problem], key \"" + boundary_key + "\":\n"
+                      + "Unknown boundary condition: " + tempstr );
          break;
       case BoundaryCondition::Dirichlet:
-         ERROUT << "ERROR: readProblemShockTube: in section [problem], key \"" << boundary_key << "\":\n"
-                << "       Boundary condition not yet implemented: " << tempstr << LF;
-         exit( RET_ERR_WRONG_PARAMETER );
+         criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                      + "readProblemShockTube: in section [problem], key \"" + boundary_key + "\":\n"
+                      + "Boundary condition not yet implemented: " + tempstr );
    //      params.boundary_left_U = createVector( PRB_DIM );
    //      params.boundary_left_U[0] = readEntry<double>( pt, "problem", "boundary rho", data.U[0][NXFIRST] );
          break;
@@ -457,14 +458,14 @@ void readProblemExplosion
       params.boundary[b] = fromString<BoundaryCondition>( tempstr );
       switch( params.boundary[b] ){
       case BoundaryCondition::Undefined:
-         ERROUT << "ERROR: readProblemExplosion: in section [problem], key \"" << boundary_key << "\":\n"
-                << "       Unknown boundary condition: " << tempstr << LF;
-         exit( RET_ERR_WRONG_PARAMETER );
+         criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                      + "readProblemExplosion: in section [problem], key \"" + boundary_key + "\":\n"
+                      + "Unknown boundary condition: " + tempstr );
          break;
       case BoundaryCondition::Dirichlet:
-         ERROUT << "ERROR: readProblemExplosion: in section [problem], key \"" << boundary_key << "\":\n"
-                << "       Boundary condition not yet implemented: " << tempstr << LF;
-         exit( RET_ERR_WRONG_PARAMETER );
+         criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                      + "readProblemExplosion: in section [problem], key \"" + boundary_key + "\":\n"
+                      + "Boundary condition not yet implemented: " + tempstr );
    //      params.boundary_left_U = createVector( PRB_DIM );
    //      params.boundary_left_U[0] = readEntry<double>( pt, "problem", "boundary rho", data.U[0][NXFIRST] );
          break;
@@ -713,9 +714,9 @@ void readProblemPlasmaSheet
             transition_coef[i] = (transition_points-i - 0.5)*diff;
          }
       } else {
-         ERROUT << "ERROR: readProblemPlasmaSheet: in section [problem], key \"transition type\":\n"
-                << "       Unknown transition type: " << tempstr << LF;
-         exit( RET_ERR_WRONG_PARAMETER );
+         criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                      + "readProblemPlasmaSheet: in section [problem], key \"transition type\":\n"
+                      + "Unknown transition type: " + tempstr );
       }
 
       // apply transitions to the sheet-lobe boundary
@@ -792,16 +793,11 @@ void readProblemPlasmaSheet
       params.boundary[b] = fromString<BoundaryCondition>( tempstr );
       switch( params.boundary[b] ){
       case BoundaryCondition::Undefined:
-         ERROUT << "ERROR: readProblemPlasmaSheet: in section [problem], key \"" << boundary_key << "\":\n"
-                << "       Unknown boundary condition: " << tempstr << LF;
-         exit( RET_ERR_WRONG_PARAMETER );
+         criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                      + "readProblemPlasmaSheet: in section [problem], key \"" + boundary_key + "\":\n"
+                      + "Unknown boundary condition: " + tempstr );
          break;
       case BoundaryCondition::Dirichlet:
-   //      ERROUT << "ERROR: readProblemPlasmaSheet: in section [problem], key \"" << boundary_key << "\":\n"
-   //             << "       Boundary condition not yet implemented: " << tempstr << LF;
-   //      exit( RET_ERR_WRONG_PARAMETER );
-   //      params.boundary_left_U = createVector( PRB_DIM );
-   //      params.boundary_left_U[0] = readEntry<double>( pt, "problem", "boundary rho", data.U[0][NXFIRST] );
          params.boundary_dirichlet_U[params.b_left  ] = createVectors( PRB_DIM, NY );
          params.boundary_dirichlet_U[params.b_top   ] = createVectors( PRB_DIM, NX );
          params.boundary_dirichlet_U[params.b_right ] = createVectors( PRB_DIM, NY );

@@ -144,7 +144,7 @@ t_status SpatialMethodCentralFD2::integrate
    }
 
    if( !pressureOK ){
-      std::string message;
+      auto message = std::string{};
       message += "Negative pressure encountered at i = " + std::to_string(pressureI-bufferWidth);
       message += ", j = " + std::to_string(pressureJ-bufferWidth);
       return { false, ReturnStatus::ErrorNegativePressure, message };

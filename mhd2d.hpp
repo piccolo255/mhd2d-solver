@@ -73,21 +73,6 @@
 #define NXLAST  (params.nx+2)
 #define NYLAST  (params.ny+2)
 
-// Function return values
-#define RET_OK              0
-#define RET_NO_CHANGE       1
-#define RET_UPDATED         2
-
-#define RET_ERR_NOT_IMPLEMENTED -001
-#define RET_ERR_TIME_UNDERFLOW  -101
-#define RET_ERR_NOT_CONVERGED   -102
-#define RET_ERR_NEG_DENSITY     -201
-#define RET_ERR_NEG_PRESSURE    -202
-
-#define RET_ERR_FILE_NOT_FOUND  -1001
-#define RET_ERR_PROPERTY_TREE   -1002
-#define RET_ERR_WRONG_PARAMETER -1003
-
 #define EPS            (1e-20)
 #define EPS_EQUAL(a,b) (std::abs((a)-(b))<EPS)
 #define EPS_ZERO(x)    (std::abs(x)<EPS)
@@ -201,6 +186,11 @@ typedef struct {
    double dt;
    double t_current;
 } t_data;
+
+// Utility - error handling
+void criticalError
+   ( ReturnStatus       error
+   , const std::string  message );
 
 // File access - open & close
 void openFile

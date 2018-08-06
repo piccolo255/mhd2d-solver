@@ -124,8 +124,8 @@ int main
       // step
       switch( params.time_stepping ){
       case TimeStepMethod::Undefined:
-         ERROUT << "ERROR: main: Unknown time stepping method." << LF;
-         exit( RET_ERR_WRONG_PARAMETER );
+         criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                      + "main: Unknown time stepping method." );
          break;
       case TimeStepMethod::Euler:
          retval = stepEuler( data.U, data.dt, params );
@@ -195,8 +195,8 @@ int main
       // time mode-specific behavior
       switch( params.time_mode ){
       case TimeStepMode::Undefined:
-         ERROUT << "ERROR: main: Unknown time stepping mode." << LF;
-         exit( RET_ERR_WRONG_PARAMETER );
+         criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                      + "main: Unknown time stepping mode." );
          break;
       case TimeStepMode::Constant:
          done = step == params.steps;
@@ -213,8 +213,8 @@ int main
       // output mode-specific behavior
       switch( output_grid.skip_mode ){
       case WriteSkipMode::Undefined:
-         ERROUT << "ERROR: main: Unknown grid output mode." << LF;
-         exit( RET_ERR_WRONG_PARAMETER );
+         criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                      + "main: Unknown grid output mode." );
          break;
       case WriteSkipMode::Step:
          output_to_file = step%output_grid.skip_steps == 0;
@@ -227,8 +227,8 @@ int main
       }
       switch( output_non_grid.skip_mode ){
       case WriteSkipMode::Undefined:
-         ERROUT << "ERROR: main: Unknown non-grid output mode." << LF;
-         exit( RET_ERR_WRONG_PARAMETER );
+         criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                      + "main: Unknown non-grid output mode." );
          break;
       case WriteSkipMode::Step:
          output_to_non_grid = step%output_non_grid.skip_steps == 0;
@@ -254,8 +254,8 @@ int main
          duration = nchrono::steady_clock::now() - clstart;
          switch( params.time_mode ){
          case TimeStepMode::Undefined:
-            ERROUT << "ERROR: main: Unknown time stepping mode." << LF;
-            exit( RET_ERR_WRONG_PARAMETER );
+            criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                         + "main: Unknown time stepping mode." );
             break;
          case TimeStepMode::Constant:
             OUT << "@ t = " << duration.count() << " sec : "
@@ -299,6 +299,38 @@ int main
        << " - Time step average  : " << duration.count()/(step-1) << " seconds.\n";
 
    return 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void criticalError
+   ( ReturnStatus       error
+   , const std::string  message
+){
+   ERROUT << "Critical error!\n"
+          << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n"
+          << message << "\n"
+          << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n"
+          << "Terminating execution.\n";
+
+   auto errcode = int{0};
+
+   switch( error ){
+   case ReturnStatus::OK                     : errcode = 0; break;
+   case ReturnStatus::NoChange               : errcode = 0; break;
+   case ReturnStatus::Updated                : errcode = 0; break;
+
+   case ReturnStatus::ErrorNotImplemented    : errcode = 100; break;
+   case ReturnStatus::ErrorTimeUnderflow     : errcode = 101; break;
+   case ReturnStatus::ErrorNotConverged      : errcode = 102; break;
+   case ReturnStatus::ErrorNegativeDensity   : errcode = 103; break;
+   case ReturnStatus::ErrorNegativePressure  : errcode = 104; break;
+
+   case ReturnStatus::ErrorFileNotFound      : errcode = 200; break;
+   case ReturnStatus::ErrorFailedToParse     : errcode = 201; break;
+   case ReturnStatus::ErrorWrongParameter    : errcode = 202; break;
+   }
+
+   exit( errcode );
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

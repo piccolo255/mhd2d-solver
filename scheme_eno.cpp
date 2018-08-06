@@ -469,8 +469,8 @@ void applyBoundaryConditions
    // left boundary
    switch( params.boundary[params.b_left] ){
    case BoundaryCondition::Undefined:
-      ERROUT << "ERROR: applyBoundaryConditions: Unknown boundary condition." << LF;
-      exit( RET_ERR_WRONG_PARAMETER );
+      criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                   + "applyBoundaryConditions: Unknown left boundary condition." );
       break;
    case BoundaryCondition::Periodic:
       for( int k = 0; k < PRB_DIM; k++ ){
@@ -527,8 +527,8 @@ void applyBoundaryConditions
    // right boundary
    switch( params.boundary[params.b_right] ){
    case BoundaryCondition::Undefined:
-      ERROUT << "ERROR: applyBoundaryConditions: Unknown boundary condition." << LF;
-      exit( RET_ERR_WRONG_PARAMETER );
+      criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                   + "applyBoundaryConditions: Unknown right boundary condition." );
       break;
    case BoundaryCondition::Periodic:
       for( int k = 0; k < PRB_DIM; k++ ){
@@ -585,8 +585,8 @@ void applyBoundaryConditions
    // bottom boundary
    switch( params.boundary[params.b_bottom] ){
    case BoundaryCondition::Undefined:
-      ERROUT << "ERROR: applyBoundaryConditions: Unknown boundary condition." << LF;
-      exit( RET_ERR_WRONG_PARAMETER );
+      criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                   + "applyBoundaryConditions: Unknown bottom boundary condition." );
       break;
    case BoundaryCondition::Periodic:
       for( int k = 0; k < PRB_DIM; k++ ){
@@ -643,8 +643,8 @@ void applyBoundaryConditions
    // top boundary
    switch( params.boundary[params.b_top] ){
    case BoundaryCondition::Undefined:
-      ERROUT << "ERROR: applyBoundaryConditions: Unknown boundary condition." << LF;
-      exit( RET_ERR_WRONG_PARAMETER );
+      criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                   + "applyBoundaryConditions: Unknown top boundary condition." );
       break;
    case BoundaryCondition::Periodic:
       for( int k = 0; k < PRB_DIM; k++ ){
