@@ -448,7 +448,8 @@ t_status getEigens_G
    std::swap( U1[4], U1[5] ); std::swap( U2[4], U2[5] );
 
    // get eigens for inverted x and y
-   auto retval = getEigens_F( U1, U2, gamma, lambda, lv, rv, break_on_neg_pressure );   if( retval.status != ReturnStatus::OK ){
+   auto retval = getEigens_F( U1, U2, gamma, lambda, lv, rv, break_on_neg_pressure );
+   if( retval.status != ReturnStatus::OK ){
       retval.message += "\n! getEigens_G";
    }
 
