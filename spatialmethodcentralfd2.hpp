@@ -22,6 +22,7 @@ class SpatialMethodCentralFD2 : public SpatialIntegrationMethod
                         ) override;
 
       static size_t requiredBufferWidth();
+
    protected:
 
    private:
