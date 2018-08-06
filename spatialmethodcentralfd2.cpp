@@ -45,9 +45,9 @@ t_status SpatialMethodCentralFD2::integrate
    , t_matrices   UL
    , double      &dtIdeal
 ){
-   bool pressureOK = true;
-   int  pressureI;
-   int  pressureJ;
+   auto pressureOK = bool{true};
+   auto pressureI  = size_t{0};
+   auto pressureJ  = size_t{0};
 
    double cxmax = 0.0;
    double cymax = 0.0; // maximum wave velocities
@@ -55,8 +55,14 @@ t_status SpatialMethodCentralFD2::integrate
    applyBoundaryConditions( U );
 
    // flux F(U), G(U)
-   for( auto i = size_t{0}; i < nxTotal; i++ ){
-      for( auto j = size_t{0}; j < nyTotal; j++ ){
+   for( auto i = nxFirst-1; i < nxLast+1; i++ ){
+      for( auto j = nyFirst-1; j < nyLast+1; j++ ){
+         // skip corners
+         if( i < nxFirst && j < nxFirst ) continue;
+         if( i < nxFirst && j >= nxLast ) continue;
+         if( i >= nxLast && j < nxFirst ) continue;
+         if( i >= nxLast && j >= nxLast ) continue;
+
          double r  = U[0][i][j];
          double mx = U[1][i][j]; double u = mx / r;
          double my = U[2][i][j]; double v = my / r;
@@ -72,10 +78,11 @@ t_status SpatialMethodCentralFD2::integrate
          double ptot = p + 0.5*bb;
 
          if( r <= 0.0 ){
-            std::string message;
-            message += "Negative density encountered at i = " + std::to_string(int(i)-int(bufferWidth));
-            message += ", j = " + std::to_string(int(j)-int(bufferWidth));
-            return { true, ReturnStatus::ErrorNegativeDensity, message };
+            return { true, ReturnStatus::ErrorNegativeDensity
+                   , std::string{} + "Negative density encountered at "
+                   +   "i = " + std::to_string(int(i)-int(bufferWidth))
+                   + ", j = " + std::to_string(int(j)-int(bufferWidth))
+                   + "\n! SpatialMethodCentralFD2::integrate" };
          }
 
          if( p <= 0.0 ){
@@ -144,10 +151,11 @@ t_status SpatialMethodCentralFD2::integrate
    }
 
    if( !pressureOK ){
-      auto message = std::string{};
-      message += "Negative pressure encountered at i = " + std::to_string(pressureI-bufferWidth);
-      message += ", j = " + std::to_string(pressureJ-bufferWidth);
-      return { false, ReturnStatus::ErrorNegativePressure, message };
+      return { true, ReturnStatus::ErrorNegativePressure
+             , std::string{} + "Negative pressure encountered at "
+             +   "i = " + std::to_string(int(pressureI)-int(bufferWidth))
+             + ", j = " + std::to_string(int(pressureJ)-int(bufferWidth))
+             + "\n! SpatialMethodCentralFD2::integrate" };
    } else {
       return { false, ReturnStatus::OK, "" };
    }

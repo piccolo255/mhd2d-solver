@@ -31,14 +31,14 @@ t_status TimeIntegrationEuler::step
    // Spatial integration, check for errors
    retval = method->integrate( U, UL, dtIdeal );
    if( retval.isError ){
-      retval.message += "\n! stepEuler: spatial integration";
+      retval.message += "\n! TimeIntegrationEuler::step: spatial integration";
       return retval;
    }
 
    // Update time step, check for errors
    retval = updateDt( dt, dtIdeal );
    if( retval.isError ){
-      retval.message += "\n! stepEuler: update time step";
+      retval.message += "\n! TimeIntegrationEuler::step: update time step";
       return retval;
    }
 
