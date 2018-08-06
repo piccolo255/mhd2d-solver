@@ -25,10 +25,10 @@
 #include <chrono>
 
 // Headers required for exception handling
-#ifdef USE_EXCEPTIONS
+#ifdef USE_THREAD_EXCEPTIONS
 #include <thread>
 #include <mutex>
-#endif // USE_EXCEPTIONS
+#endif // USE_THREAD_EXCEPTIONS
 
 // Headers required for OpenMP parallelization
 #ifdef OPENMP
@@ -295,7 +295,7 @@ void divBCalculation
    , double &maxdivb
    , double &totdivb );
 
-#ifdef USE_EXCEPTIONS
+#ifdef USE_THREAD_EXCEPTIONS
 // Class for exception handling that can be used in OpenMP parallelized code
 // Source: http://stackoverflow.com/questions/11828539/elegant-exceptionhandling-in-openmp
 class ThreadException {
@@ -326,6 +326,6 @@ public:
       }
    }
 };
-#endif // USE_EXCEPTIONS
+#endif // USE_THREAD_EXCEPTIONS
 
 #endif // MHD2D_HPP_INCLUDED

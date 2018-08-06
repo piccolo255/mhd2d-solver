@@ -21,7 +21,7 @@ endif
 
 # Check for "exceptions=true" or "exceptions=1" flag, modify CFLAGS accordingly
 ifneq (,$(filter $(exceptions),true 1))
-   CXXFLAGS += -DUSE_EXCEPTIONS
+   CXXFLAGS += -DUSE_THREAD_EXCEPTIONS
 endif
 
 # Libraries
