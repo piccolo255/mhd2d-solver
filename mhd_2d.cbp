@@ -94,6 +94,12 @@
 		<Unit filename="spatialmethodcentralfd2.cpp" />
 		<Unit filename="spatialmethodcentralfd2.hpp" />
 		<Unit filename="time_steppers.cpp" />
+		<Unit filename="timeintegrationeuler.cpp" />
+		<Unit filename="timeintegrationeuler.hpp" />
+		<Unit filename="timeintegrationmethod.cpp" />
+		<Unit filename="timeintegrationmethod.hpp" />
+		<Unit filename="timeintegrationrk3.cpp" />
+		<Unit filename="timeintegrationrk3.hpp" />
 		<Unit filename="vector_utilities.cpp" />
 		<Unit filename="vector_utilities.hpp" />
 		<Extensions>
