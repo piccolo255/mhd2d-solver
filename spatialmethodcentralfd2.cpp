@@ -55,8 +55,8 @@ t_status SpatialMethodCentralFD2::integrate
    applyBoundaryConditions( U );
 
    // flux F(U), G(U)
-   for( int i = 0; i < nxTotal; i++ ){
-      for( int j = 0; j < nyTotal; j++ ){
+   for( auto i = size_t{0}; i < nxTotal; i++ ){
+      for( auto j = size_t{0}; j < nyTotal; j++ ){
          double r  = U[0][i][j];
          double mx = U[1][i][j]; double u = mx / r;
          double my = U[2][i][j]; double v = my / r;
@@ -134,9 +134,9 @@ t_status SpatialMethodCentralFD2::integrate
    ideal_dt = std::min( dx/cxmax, dy/cymax );
 
    // use numerical fluxes to calculate dU/dt
-   for( int k = 0; k < PRB_DIM; k++ ){
-      for( int i = nxFirst; i < nxLast; i++ ){
-         for( int j = nyFirst; j < nyLast; j++ ){
+   for( auto k = size_t{0}; k < PRB_DIM; k++ ){
+      for( auto i = nxFirst; i < nxLast; i++ ){
+         for( auto j = nyFirst; j < nyLast; j++ ){
             UL[k][i][j] = -(1.0/(2.0*dx)) * ( F[k][i+1][j] - F[k][i-1][j] )
                           -(1.0/(2.0*dy)) * ( G[k][i][j+1] - G[k][i][j-1] );
          }

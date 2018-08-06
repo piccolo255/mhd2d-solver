@@ -26,20 +26,20 @@ class SpatialIntegrationMethod
    protected:
       static const size_t minimumBufferWidth = 0;
 
-      const int         nxProblem;
-      const int         nyProblem;
-      const int         bufferWidth;
+      const size_t         nxProblem;
+      const size_t         nyProblem;
+      const size_t         bufferWidth;
       const double      dx;
       const double      dy;
       const t_boundary  boundary;
       const double      gamma;
 
-      const int nxFirst;
-      const int nyFirst;
-      const int nxLast;
-      const int nyLast;
-      const int nxTotal;
-      const int nyTotal;
+      const size_t nxFirst;
+      const size_t nyFirst;
+      const size_t nxLast;
+      const size_t nyLast;
+      const size_t nxTotal;
+      const size_t nyTotal;
 
       virtual t_status applyBoundaryConditions( t_matrices U
                                           );
