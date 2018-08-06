@@ -18,7 +18,7 @@ class SpatialMethodCentralFD2 : public SpatialIntegrationMethod
 
       t_status integrate( t_matrices    U
                         , t_matrices    UL
-                        , double       &ideal_dt
+                        , double       &dtIdeal
                         ) override;
 
       static size_t requiredBufferWidth();

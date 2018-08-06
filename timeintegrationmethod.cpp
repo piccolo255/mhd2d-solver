@@ -36,7 +36,7 @@ t_status TimeIntegrationMethod::updateDt
    auto dt = dtCurrent;
 
    // resize dt to fit between 0.5*cfl and cfl
-   while( dt < 0.5*cflNumber*dtIdeal && dt <= dtMax ){
+   while( dt < 0.5*cflNumber*dtIdeal ){
       dt *= 2.0;
 
       #ifdef DEBUG_DT_UPDATE
@@ -44,7 +44,7 @@ t_status TimeIntegrationMethod::updateDt
       #endif // DEBUG_DT_UPDATE
    }
 
-   while( dt > cflNumber*dtIdeal && dt >= dtMin ){
+   while( dt > cflNumber*dtIdeal ){
       dt /= 2.0;
 
       #ifdef DEBUG_DT_UPDATE
@@ -60,7 +60,10 @@ t_status TimeIntegrationMethod::updateDt
    // error if < dtMin
    if( dt < dtMin ){
       return { true, ReturnStatus::ErrorTimeUnderflow
-             , "smallest allowed dt does not satisfy CFL condition\n! updateDt" };
+             , std::string{} + "CFL condition violated!\n"
+             + "Minimum time step = " + std::to_string(dtMin) + "\n"
+             + "Target time step  = " + std::to_string(dt) + "\n"
+             + "! updateDt" };
    }
 
    if( dt == dtCurrent ){

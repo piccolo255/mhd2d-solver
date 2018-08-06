@@ -18,7 +18,7 @@ class SpatialIntegrationMethod
 
       virtual t_status integrate( t_matrices    U
                                 , t_matrices    UL
-                                , double       &ideal_dt
+                                , double       &dtIdeal
                                 ) = 0;
 
       static size_t requiredBufferWidth();

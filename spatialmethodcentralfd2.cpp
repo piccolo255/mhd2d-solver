@@ -19,8 +19,8 @@ SpatialMethodCentralFD2::SpatialMethodCentralFD2
                                "central finite difference; need at least 1 extra grid" );
    }
 
-   F  = createMatrices( PRB_DIM, nxTotal, nyTotal );
-   G  = createMatrices( PRB_DIM, nxTotal, nyTotal );
+   F = createMatrices( PRB_DIM, nxTotal, nyTotal );
+   G = createMatrices( PRB_DIM, nxTotal, nyTotal );
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -43,7 +43,7 @@ size_t SpatialMethodCentralFD2::requiredBufferWidth
 t_status SpatialMethodCentralFD2::integrate
    ( t_matrices   U
    , t_matrices   UL
-   , double      &ideal_dt
+   , double      &dtIdeal
 ){
    bool pressureOK = true;
    int  pressureI;
@@ -73,8 +73,8 @@ t_status SpatialMethodCentralFD2::integrate
 
          if( r <= 0.0 ){
             std::string message;
-            message += "Negative density encountered at i = " + std::to_string(i-bufferWidth);
-            message += ", j = " + std::to_string(j-bufferWidth);
+            message += "Negative density encountered at i = " + std::to_string(int(i)-int(bufferWidth));
+            message += ", j = " + std::to_string(int(j)-int(bufferWidth));
             return { true, ReturnStatus::ErrorNegativeDensity, message };
          }
 
@@ -131,7 +131,7 @@ t_status SpatialMethodCentralFD2::integrate
    }
 
    // update dt from max wave speeds
-   ideal_dt = std::min( dx/cxmax, dy/cymax );
+   dtIdeal = std::min( dx/cxmax, dy/cymax );
 
    // use numerical fluxes to calculate dU/dt
    for( auto k = size_t{0}; k < PRB_DIM; k++ ){
