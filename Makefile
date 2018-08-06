@@ -28,7 +28,23 @@ endif
 LIBS = 
 
 # Sources
-SRCS = main.cpp conversions.cpp div_b_fix.cpp file_access.cpp scheme_central_fd.cpp scheme_eno.cpp time_steppers.cpp vector_utilities.cpp enums.cpp
+SRCS = main.cpp\
+       conversions.cpp\
+       div_b_fix.cpp\
+       file_access.cpp\
+       vector_utilities.cpp\
+       enums.cpp\
+       scheme_central_fd.cpp\
+       scheme_eno.cpp\
+       time_steppers.cpp\
+       spatialintegrationmethod.cpp\
+       spatialmethodcentralfd2.cpp\
+       spatialmethodeno.cpp\
+       spatialmethodenoroe.cpp\
+       spatialmethodenolf.cpp\
+       timeintegrationmethod.cpp\
+       timeintegrationeuler.cpp\
+       timeintegrationrk3.cpp
 
 # Object files
 OBJS = $(SRCS:.cpp=.o)

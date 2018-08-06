@@ -21,6 +21,13 @@
 #include <execinfo.h>
 #endif // __linux__
 
+#include "spatialmethodcentralfd2.hpp"
+#include "spatialmethodenoroe.hpp"
+#include "spatialmethodenolf.hpp"
+
+#include "timeintegrationeuler.hpp"
+#include "timeintegrationrk3.hpp"
+
 #ifdef USE_THREAD_EXCEPTIONS
 /// http://stackoverflow.com/questions/11828539/elegant-exceptionhandling-in-openmp
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -100,6 +107,39 @@ int main
    outputGridData( output_grid, params, data, 0, 0 );
    outputNonGridData( output_non_grid, params, data, 0, 0 );
 
+   auto bufferWidth = size_t{NXFIRST};
+   auto boundary = t_boundary{ params.boundary[params.b_right]
+                             , params.boundary[params.b_top]
+                             , params.boundary[params.b_left]
+                             , params.boundary[params.b_bottom] };
+   auto method_ptr = std::unique_ptr<SpatialIntegrationMethod>{};
+   auto stepper = std::unique_ptr<TimeIntegrationMethod>{};
+   switch( params.scheme ){
+   case IntegrationMethod::Undefined:
+      criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                   + "main: Unknown space integration method." );
+   case IntegrationMethod::CentralFD:
+      method_ptr = std::unique_ptr<SpatialIntegrationMethod>{ new SpatialMethodCentralFD2( params.nx, params.ny, bufferWidth, params.dx, params.dy, boundary, params.gamma ) };
+      break;
+   case IntegrationMethod::ENO_Roe:
+      method_ptr = std::unique_ptr<SpatialIntegrationMethod>{ new SpatialMethodEnoRoe( params.nx, params.ny, bufferWidth, params.dx, params.dy, boundary, params.gamma ) };
+      break;
+   case IntegrationMethod::ENO_LF:
+      method_ptr = std::unique_ptr<SpatialIntegrationMethod>{ new SpatialMethodEnoLF( params.nx, params.ny, bufferWidth, params.dx, params.dy, boundary, params.gamma ) };
+      break;
+   }
+   switch( params.time_stepping ){
+   case TimeStepMethod::Undefined:
+      criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                   + "main: Unknown time stepping method." );
+   case TimeStepMethod::Euler:
+      stepper = std::unique_ptr<TimeIntegrationMethod>{ new TimeIntegrationEuler( params.nx, params.ny, bufferWidth, params.dt_min, params.dt_max, params.cfl_number, std::move(method_ptr) ) };
+      break;
+   case TimeStepMethod::RungeKutta3_TVD:
+      stepper = std::unique_ptr<TimeIntegrationMethod>{ new TimeIntegrationRK3( params.nx, params.ny, bufferWidth, params.dt_min, params.dt_max, params.cfl_number, std::move(method_ptr) ) };
+      break;
+   }
+
    int step_progress = 0;
    if( params.time_mode == TimeStepMode::Constant )
       step_progress = (params.steps>100) ? params.steps/100 : 1;
@@ -122,18 +162,22 @@ int main
    /* main loop */
    while( !done ){
       // step
-      switch( params.time_stepping ){
-      case TimeStepMethod::Undefined:
-         criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
-                      + "main: Unknown time stepping method." );
-         break;
-      case TimeStepMethod::Euler:
-         retval = stepEuler( data.U, data.dt, params );
-         break;
-      case TimeStepMethod::RungeKutta3_TVD:
-         retval = stepRK3TVD( data.U, data.dt, params );
-         break;
-      }
+      #ifdef OLD_STYLE
+         switch( params.time_stepping ){
+         case TimeStepMethod::Undefined:
+            criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                         + "main: Unknown time stepping method." );
+            break;
+         case TimeStepMethod::Euler:
+            retval = stepEuler( data.U, data.dt, params );
+            break;
+         case TimeStepMethod::RungeKutta3_TVD:
+            retval = stepRK3TVD( data.U, data.dt, params );
+            break;
+         }
+      #else
+         retval = stepper->step( data.U, data.dt );
+      #endif // OLD_STYLE
 
       // Process the return value
       if( retval.status == ReturnStatus::ErrorTimeUnderflow ){
@@ -145,6 +189,7 @@ int main
       if( retval.isError ){
          // other errors
          ERROUT << "ERROR: main: Terminating simulation." << LF;
+         ERROUT << retval.message;
          break;
       }
 

@@ -91,7 +91,8 @@ t_status SpatialMethodEnoLF::integrate
          }
          // update per-y maximums
          for( auto k = size_t{0}; k < PRB_DIM; k++ ){
-            if( auto alphaabs = fabs(talpha[k]) > alphaF[k][j] )
+            auto alphaabs = fabs(talpha[k]);
+            if( alphaabs > alphaF[k][j] )
                alphaF[k][j] = alphaabs;
          }
 
@@ -114,7 +115,8 @@ t_status SpatialMethodEnoLF::integrate
          }
          // update per-x maximums
          for( auto k = size_t{0}; k < PRB_DIM; k++ ){
-            if( auto alphaabs = fabs(talpha[k]) > alphaG[k][i] )
+            auto alphaabs = fabs(talpha[k]);
+            if( alphaabs > alphaG[k][i] )
                alphaG[k][i] = alphaabs;
          }
       }
@@ -256,7 +258,8 @@ t_status SpatialMethodEnoLF::getNumericalFluxF
 
    // update maximum wave speed
    for( auto k = size_t{0}; k < PRB_DIM; k++ ){
-      if( auto aabs = fabs(a[k]) > maxWaveSpeed )
+      auto aabs = fabs(a[k]);
+      if( aabs > maxWaveSpeed )
          maxWaveSpeed = aabs;
    }
 

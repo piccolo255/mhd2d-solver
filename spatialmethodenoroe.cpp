@@ -205,7 +205,8 @@ t_status SpatialMethodEnoRoe::getNumericalFluxF
 
    // update maximum wave speed
    for( auto k = size_t{0}; k < PRB_DIM; k++ ){
-      if( auto aabs = fabs(a[k]) > maxWaveSpeed )
+      auto aabs = fabs(a[k]);
+      if( aabs > maxWaveSpeed )
          maxWaveSpeed = aabs;
    }
 
