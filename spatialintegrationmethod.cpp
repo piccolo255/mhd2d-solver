@@ -79,10 +79,13 @@ t_status SpatialIntegrationMethod::applyBoundaryConditions
             U[2][nxFirst-i][j] = -U[2][nxFirst+i][j];
          }
       }
+      for( auto j = nyFirst; j < nyLast; j++ ){
+         U[2][nxFirst][j] = 0;
+      }
       // use div B = 0 for dBx/dx and dBy/dy boundary conditions
       {
          double ratio_xy = dx/dy;
-         for( auto i = nxFirst; i > 1; i-- ){
+         for( auto i = nxFirst; i > 0; i-- ){
             for( auto j = nyFirst+1; j < nyLast-1; j++ ){
                U[4][i-1][j] = U[4][i+1][j] - ratio_xy*( U[5][i][j-1] - U[5][i][j+1] );
             }
@@ -138,6 +141,9 @@ t_status SpatialIntegrationMethod::applyBoundaryConditions
          for( auto j = nyFirst; j < nyLast; j++ ){
             U[2][nxLast-1+i][j] = -U[2][nxLast-1-i][j];
          }
+      }
+      for( auto j = nyFirst; j < nyLast; j++ ){
+         U[2][nxLast-1][j] = 0;
       }
       // use div B = 0 for dBx/dx and dBy/dy boundary conditions
       {
@@ -195,6 +201,7 @@ t_status SpatialIntegrationMethod::applyBoundaryConditions
       }
       // invert parallel velocity
       for( auto i = nxFirst; i < nxLast; i++ ){
+         U[1][i][nyFirst] = 0;
          for( auto j = bufferWidth; j > 0; j-- ){
             U[1][i][nyFirst-j] = -U[1][i][nyFirst+j];
          }
@@ -203,7 +210,7 @@ t_status SpatialIntegrationMethod::applyBoundaryConditions
       {
          double ratio_yx = dy/dx;
          for( auto i = nxFirst+1; i < nxLast-1; i++ ){
-            for( auto j = nyFirst; j > 1; j-- ){
+            for( auto j = nyFirst; j > 0; j-- ){
                U[5][i][j-1] = U[5][i][j+1] - ratio_yx*( U[4][i-1][j] - U[4][i+1][j] );
             }
          }
@@ -255,6 +262,7 @@ t_status SpatialIntegrationMethod::applyBoundaryConditions
       }
       // invert parallel velocity
       for( auto i = nxFirst; i < nxLast; i++ ){
+         U[1][i][nyLast-1] = 0;
          for( auto j = bufferWidth; j > 0; j-- ){
             U[1][i][nyLast-1+j] = -U[1][i][nyLast-1-j];
          }
