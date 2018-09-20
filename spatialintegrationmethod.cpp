@@ -106,7 +106,7 @@ t_status SpatialIntegrationMethod::applyBoundaryConditions
       // use div B = 0 for dBx/dx and dBy/dy boundary conditions
       {
          double ratio_xy = dx/dy;
-         for( auto i = nxFirst; i > 1; i-- ){
+         for( auto i = nxFirst; i > 0; i-- ){
             for( auto j = nyFirst+1; j < nyLast-1; j++ ){
                U[4][i-1][j] = U[4][i+1][j] - ratio_xy*( U[5][i][j-1] - U[5][i][j+1] );
             }
@@ -211,7 +211,7 @@ t_status SpatialIntegrationMethod::applyBoundaryConditions
       {
          double ratio_yx = dy/dx;
          for( auto i = nxFirst+1; i < nxLast-1; i++ ){
-            for( auto j = nyFirst; j > 1; j-- ){
+            for( auto j = nyFirst; j > 0; j-- ){
                U[5][i][j-1] = U[5][i][j+1] - ratio_yx*( U[4][i-1][j] - U[4][i+1][j] );
             }
          }
