@@ -73,6 +73,12 @@ t_status SpatialIntegrationMethod::applyBoundaryConditions
             }
          }
       }
+      // invert parallel velocity
+      for( auto i = bufferWidth; i > 0; i-- ){
+         for( auto j = nyFirst; j < nyLast; j++ ){
+            U[2][nxFirst-i][j] = -U[2][nxFirst+i][j];
+         }
+      }
       // use div B = 0 for dBx/dx and dBy/dy boundary conditions
       {
          double ratio_xy = dx/dy;
@@ -125,6 +131,12 @@ t_status SpatialIntegrationMethod::applyBoundaryConditions
             for( auto j = nyFirst; j < nyLast; j++ ){
                U[k][nxLast-1+i][j] = U[k][nxLast-1-i][j];
             }
+         }
+      }
+      // invert parallel velocity
+      for( auto i = bufferWidth; i > 0; i-- ){
+         for( auto j = nyFirst; j < nyLast; j++ ){
+            U[2][nxLast-1+i][j] = -U[2][nxLast-1-i][j];
          }
       }
       // use div B = 0 for dBx/dx and dBy/dy boundary conditions
@@ -181,6 +193,12 @@ t_status SpatialIntegrationMethod::applyBoundaryConditions
             }
          }
       }
+      // invert parallel velocity
+      for( auto i = nxFirst; i < nxLast; i++ ){
+         for( auto j = bufferWidth; j > 0; j-- ){
+            U[1][i][nyFirst-j] = -U[1][i][nyFirst+j];
+         }
+      }
       // use div B = 0 for dBx/dx and dBy/dy boundary conditions
       {
          double ratio_yx = dy/dx;
@@ -233,6 +251,12 @@ t_status SpatialIntegrationMethod::applyBoundaryConditions
             for( auto j = bufferWidth; j > 0; j-- ){
                U[k][i][nyLast-1+j] = U[k][i][nyLast-1-j];
             }
+         }
+      }
+      // invert parallel velocity
+      for( auto i = nxFirst; i < nxLast; i++ ){
+         for( auto j = bufferWidth; j > 0; j-- ){
+            U[1][i][nyLast-1+j] = -U[1][i][nyLast-1-j];
          }
       }
       // use div B = 0 for dBx/dx and dBy/dy boundary conditions
