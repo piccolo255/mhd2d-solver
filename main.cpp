@@ -128,6 +128,8 @@ int main
       method_ptr = std::unique_ptr<SpatialIntegrationMethod>{ new SpatialMethodEnoLF( params.nx, params.ny, bufferWidth, params.dx, params.dy, boundary, params.gamma ) };
       break;
    }
+   method_ptr->initializeDirichletBoundaries( data.U );
+
    switch( params.time_stepping ){
    case TimeStepMethod::Undefined:
       criticalError( ReturnStatus::ErrorWrongParameter, std::string{}

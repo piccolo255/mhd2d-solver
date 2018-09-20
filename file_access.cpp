@@ -371,12 +371,6 @@ void readProblemShockTube
                       + "Unknown boundary condition: " + tempstr );
          break;
       case BoundaryCondition::Dirichlet:
-         criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
-                      + "readProblemShockTube: in section [problem], key \"" + boundary_key + "\":\n"
-                      + "Boundary condition not yet implemented: " + tempstr );
-   //      params.boundary_left_U = createVector( PRB_DIM );
-   //      params.boundary_left_U[0] = readEntry<double>( pt, "problem", "boundary rho", data.U[0][NXFIRST] );
-         break;
       case BoundaryCondition::Periodic:
       case BoundaryCondition::Neumann:
       case BoundaryCondition::Open:
@@ -557,12 +551,6 @@ void readProblemExplosion
                       + "Unknown boundary condition: " + tempstr );
          break;
       case BoundaryCondition::Dirichlet:
-         criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
-                      + "readProblemExplosion: in section [problem], key \"" + boundary_key + "\":\n"
-                      + "Boundary condition not yet implemented: " + tempstr );
-   //      params.boundary_left_U = createVector( PRB_DIM );
-   //      params.boundary_left_U[0] = readEntry<double>( pt, "problem", "boundary rho", data.U[0][NXFIRST] );
-         break;
       case BoundaryCondition::Periodic:
       case BoundaryCondition::Neumann:
       case BoundaryCondition::Open:

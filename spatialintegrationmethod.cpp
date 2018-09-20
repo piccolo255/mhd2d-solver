@@ -19,14 +19,43 @@ SpatialIntegrationMethod::SpatialIntegrationMethod
    , nxLast { nx+bufferWidth   }, nyLast { ny+bufferWidth   }
    , nxTotal{ nx+bufferWidth*2 }, nyTotal{ ny+bufferWidth*2 }
 {
-   //ctor
+   requireBoundaryInitialization = boundary.left   == BoundaryCondition::Dirichlet
+                                || boundary.right  == BoundaryCondition::Dirichlet
+                                || boundary.top    == BoundaryCondition::Dirichlet
+                                || boundary.bottom == BoundaryCondition::Dirichlet;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 SpatialIntegrationMethod::~SpatialIntegrationMethod
    (
 ){
-   //dtor
+   if( dirichletBoundaryLeft     ) freeVectors( dirichletBoundaryLeft    );
+   if( dirichletBoundaryRight    ) freeVectors( dirichletBoundaryRight   );
+   if( dirichletBoundaryTop      ) freeVectors( dirichletBoundaryTop     );
+   if( dirichletBoundaryBottom   ) freeVectors( dirichletBoundaryBottom  );
+}
+
+
+void SpatialIntegrationMethod::initializeDirichletBoundaries
+   ( t_matrices U
+){
+   dirichletBoundaryLeft   = createVectors( PRB_DIM, nyTotal );
+   dirichletBoundaryRight  = createVectors( PRB_DIM, nyTotal );
+   dirichletBoundaryTop    = createVectors( PRB_DIM, nxTotal );
+   dirichletBoundaryBottom = createVectors( PRB_DIM, nxTotal );
+
+   for( size_t k = 0; k < PRB_DIM; k++ ){
+      for( size_t i = nxFirst; i < nxLast; i++ ){
+         dirichletBoundaryBottom[k][i] = U[k][i][nyFirst];
+         dirichletBoundaryTop[k][i]    = U[k][i][nyLast-1];
+      }
+      for( size_t j = nyFirst; j < nyLast; j++ ){
+         dirichletBoundaryLeft[k][j]   = U[k][nxFirst][j];
+         dirichletBoundaryRight[k][j]  = U[k][nxLast-1][j];
+      }
+   }
+
+   requireBoundaryInitialization = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -40,6 +69,9 @@ size_t SpatialIntegrationMethod::requiredBufferWidth
 t_status SpatialIntegrationMethod::applyBoundaryConditions
    ( t_matrices U
 ){
+   if( requireBoundaryInitialization ){
+      return { true, ReturnStatus::ErrorWrongParameter, "SpatialIntegrationMethod::applyBoundaryConditions: boundary not initialized." };
+   }
    // left boundary
    switch( boundary.left ){
    case BoundaryCondition::Undefined:
@@ -58,9 +90,7 @@ t_status SpatialIntegrationMethod::applyBoundaryConditions
       for( auto k = size_t{0}; k < PRB_DIM; k++ ){
          for( auto i = bufferWidth; i > 0; i-- ){
             for( auto j = nyFirst; j < nyLast; j++ ){
-               /// TODO
-               //U[k][nxFirst-i][j] = boundary_dirichlet_U[params.b_left][k][j];
-               return { true, ReturnStatus::ErrorNotImplemented, "Not implemented: Dirichlet BC." };
+               U[k][nxFirst-i][j] = dirichletBoundaryLeft[k][j];
             }
          }
       }
@@ -112,9 +142,7 @@ t_status SpatialIntegrationMethod::applyBoundaryConditions
       for( auto k = size_t{0}; k < PRB_DIM; k++ ){
          for( auto i = bufferWidth; i > 0; i-- ){
             for( auto j = nyFirst; j < nyLast; j++ ){
-               /// TODO
-               //U[k][nxLast-1+i][j] = params.boundary_dirichlet_U[params.b_right][k][j];
-               return { true, ReturnStatus::ErrorNotImplemented, "Not implemented: Dirichlet BC." };
+               U[k][nxLast-1+i][j] = dirichletBoundaryRight[k][j];
             }
          }
       }
@@ -166,9 +194,7 @@ t_status SpatialIntegrationMethod::applyBoundaryConditions
       for( auto k = size_t{0}; k < PRB_DIM; k++ ){
          for( auto i = nxFirst; i < nxLast; i++ ){
             for( auto j = bufferWidth; j > 0; j-- ){
-               /// TODO
-               //U[k][i][nyFirst-j] = params.boundary_dirichlet_U[params.b_bottom][k][i];
-               return { true, ReturnStatus::ErrorNotImplemented, "Not implemented: Dirichlet BC." };
+               U[k][i][nyFirst-j] = dirichletBoundaryBottom[k][i];
             }
          }
       }
@@ -220,9 +246,7 @@ t_status SpatialIntegrationMethod::applyBoundaryConditions
       for( auto k = size_t{0}; k < PRB_DIM; k++ ){
          for( auto i = nxFirst; i < nxLast; i++ ){
             for( auto j = bufferWidth; j > 0; j-- ){
-               /// TODO
-               //U[k][i][nyLast-1+j] = params.boundary_dirichlet_U[params.b_top][k][i];
-               return { true, ReturnStatus::ErrorNotImplemented, "Not implemented: Dirichlet BC." };
+               U[k][i][nyLast-1+j] = dirichletBoundaryTop[k][i];
             }
          }
       }

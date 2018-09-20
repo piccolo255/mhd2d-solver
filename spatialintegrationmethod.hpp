@@ -16,6 +16,9 @@ class SpatialIntegrationMethod
                                        );
       virtual ~SpatialIntegrationMethod();
 
+      void initializeDirichletBoundaries( t_matrices U
+                                        );
+
       virtual t_status integrate( t_matrices    U
                                 , t_matrices    UL
                                 , double       &dtIdeal
@@ -40,6 +43,12 @@ class SpatialIntegrationMethod
       const size_t nyLast;
       const size_t nxTotal;
       const size_t nyTotal;
+
+      bool requireBoundaryInitialization;
+      t_vectors dirichletBoundaryLeft   = nullptr;
+      t_vectors dirichletBoundaryRight  = nullptr;
+      t_vectors dirichletBoundaryTop    = nullptr;
+      t_vectors dirichletBoundaryBottom = nullptr;
 
       virtual t_status applyBoundaryConditions( t_matrices U
                                               );
