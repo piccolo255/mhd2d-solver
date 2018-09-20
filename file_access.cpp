@@ -399,9 +399,24 @@ void readProblemExplosion
    params.start_x = readEntry<double>( pt, "problem", "start_x", -1.0 );
    params.start_y = readEntry<double>( pt, "problem", "start_y", -1.0 );
 
+   // give meaningful names
+   t_matrix U_rho = data.U[0];
+   t_matrix U_u   = data.u[0];
+   t_matrix U_v   = data.u[1];
+   t_matrix U_w   = data.u[2];
+   t_matrix U_bx  = data.U[4];
+   t_matrix U_by  = data.U[5];
+   t_matrix U_bz  = data.U[6];
+   t_matrix U_p   = data.p;
+   std::vector<t_matrix> U_natural = { U_rho, U_u, U_v, U_w, U_bx, U_by, U_bz, U_p };
+
    double in[PRB_DIM];
    double out[PRB_DIM];
+
    double r = readEntry<double>( pt, "problem", "r",       0.4   );
+   auto is_inside = [&params, &r]( size_t i, size_t j ){
+      return (i-NX/2)*(i-NX/2)*params.dx*params.dx + (j-NY/2)*(j-NY/2)*params.dy*params.dy < r*r;
+   };
 
    in[0]    = readEntry<double>( pt, "problem", "rho_in",  1.0   );
    in[1]    = readEntry<double>( pt, "problem", "u_in",    0.0   );
@@ -423,27 +438,106 @@ void readProblemExplosion
 
    for( int i = NXFIRST; i < NXLAST; i++ ){
       for( int j = NYFIRST; j < NYLAST; j++ ){
-         if( (i-NX/2)*(i-NX/2)*params.dx*params.dx + (j-NY/2)*(j-NY/2)*params.dy*params.dy < r*r ){
-            data.U[0][i][j] = in[0];
-            data.u[0][i][j] = in[1];
-            data.u[1][i][j] = in[2];
-            data.u[2][i][j] = in[3];
-            data.U[4][i][j] = in[4];
-            data.U[5][i][j] = in[5];
-            data.U[6][i][j] = in[6];
-            data.p[i][j]    = in[7];
+         if( is_inside(i,j) ){
+            U_rho[i][j] = in[0];
+            U_u  [i][j] = in[1];
+            U_v  [i][j] = in[2];
+            U_w  [i][j] = in[3];
+            U_bx [i][j] = in[4];
+            U_by [i][j] = in[5];
+            U_bz [i][j] = in[6];
+            U_p  [i][j] = in[7];
          } else {
-            data.U[0][i][j] = out[0];
-            data.u[0][i][j] = out[1];
-            data.u[1][i][j] = out[2];
-            data.u[2][i][j] = out[3];
-            data.U[4][i][j] = out[4];
-            data.U[5][i][j] = out[5];
-            data.U[6][i][j] = out[6];
-            data.p[i][j]    = out[7];
+            U_rho[i][j] = out[0];
+            U_u  [i][j] = out[1];
+            U_v  [i][j] = out[2];
+            U_w  [i][j] = out[3];
+            U_bx [i][j] = out[4];
+            U_by [i][j] = out[5];
+            U_bz [i][j] = out[6];
+            U_p  [i][j] = out[7];
          }
       }
    }
+
+   // create transition layer
+   std::string transition_type = readEntry<std::string>( pt, "problem", "transition type", "jump" );
+   if( transition_type == "jump" ){
+      // nothing to do
+   } else {
+      int transition_points = 2*readEntry<int>( pt, "problem", "transition points", 1 );
+
+      // prepare transition coefficients
+      std::vector<double> transition_coef( transition_points );
+      if( transition_type == "linear" ){
+         double diff = 1.0/transition_points;
+         for( int i = 0; i < transition_points; i++ ){
+            transition_coef[i] = (transition_points-i - 0.5)*diff;
+         }
+      } else {
+         criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                      + "readProblemPlasmaSheet: in section [problem], key \"transition type\":\n"
+                      + "Unknown transition type: " + tempstr );
+      }
+
+      auto mag_pressure = []( double bx, double by, double bz ){
+         return 0.5*(bx*bx+by*by+bz*bz);
+      };
+      auto combine = []( double coef, double first, double second ){
+         return coef*first + (1.0-coef)*second;
+      };
+
+      // calculate transition values
+      std::vector< std::vector<double> > transition_U( transition_points );
+      for( size_t p = 0; p < transition_points; p++ ){
+         transition_U[p].resize( PRB_DIM );
+         for( size_t k = 0; k < PRB_DIM; k++ ){
+            transition_U[p][k] = combine( transition_coef[p], in[k], out[k] );
+         }
+         // fix pressure
+         double ptot_in  =  in[7] + mag_pressure(  in[4],  in[5],  in[6] );
+         double ptot_out = out[7] + mag_pressure( out[4], out[5], out[6] );
+         double ptot = combine( transition_coef[p], ptot_in, ptot_out );
+         transition_U[p][7] = ptot - mag_pressure( transition_U[p][4], transition_U[p][5], transition_U[p][6] );
+      }
+
+      // find border points
+      std::vector< std::pair< size_t, size_t > > border_up;
+      std::vector< std::pair< size_t, size_t > > border_dn;
+      std::vector< std::pair< size_t, size_t > > border_lt;
+      std::vector< std::pair< size_t, size_t > > border_rt;
+      for( size_t i = NXFIRST; i < NXLAST; i++ ){
+         for( size_t j = NYFIRST; j < NYLAST; j++ ){
+            if( !is_inside(i,j) ) continue;
+            if( !is_inside(i-1,j) ) border_lt.push_back( { i , j } );
+            if( !is_inside(i+1,j) ) border_rt.push_back( { i , j } );
+            if( !is_inside(i,j-1) ) border_dn.push_back( { i , j } );
+            if( !is_inside(i,j+1) ) border_up.push_back( { i , j } );
+         }
+      }
+
+      // apply transition, from inside out
+      for( size_t p = 0; p < transition_points; p++ ){
+         auto p_dif = p - transition_points/2 + 1;
+         for( size_t k = 0; k < PRB_DIM; k++ ){
+            for( auto &point: border_up ){
+               U_natural[k][point.first][point.second+p_dif] = transition_U[p][k];
+            }
+            for( auto &point: border_dn ){
+               U_natural[k][point.first][point.second-p_dif] = transition_U[p][k];
+            }
+            for( auto &point: border_lt ){
+               U_natural[k][point.first-p_dif][point.second] = transition_U[p][k];
+            }
+            for( auto &point: border_rt ){
+               U_natural[k][point.first+p_dif][point.second] = transition_U[p][k];
+            }
+         }
+      }
+   }
+
+
+
    toConservationData( params, data );
 
    std::vector<std::string> boundary_name(params.b_count);
