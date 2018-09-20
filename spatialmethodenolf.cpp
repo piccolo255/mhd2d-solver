@@ -146,8 +146,19 @@ t_status SpatialMethodEnoLF::integrate
             talpha[k] = alphaF[k][j];
          }
 
+         bool hasLeftBoundary = false;
+         bool hasRightBoundary = false;
+         size_t boundaryValidIndex = 0;
+         if( i < nxFirst+1 ){
+            hasLeftBoundary = true;
+            boundaryValidIndex = nxFirst - i + 1;
+         } else if( i > nxLast-3 ){
+            hasRightBoundary = true;
+            boundaryValidIndex = nxLast - i;
+         }
+
          // find numerical flux
-         status = getNumericalFluxF( tU1, tU2, tU, tF, talpha, tF_, tMaxWaveSpeed );
+         status = getNumericalFluxF( tU1, tU2, tU, tF, talpha, tF_, tMaxWaveSpeed, hasLeftBoundary, hasRightBoundary, boundaryValidIndex );
          if( status.isError ){
             status.message += "\n! SpatialMethodEnoLF::integrate: F flux";
             return status;
@@ -186,8 +197,19 @@ t_status SpatialMethodEnoLF::integrate
             talpha[k] = alphaG[k][i];
          }
 
+         bool hasLeftBoundary = false;
+         bool hasRightBoundary = false;
+         size_t boundaryValidIndex = 0;
+         if( j < nyFirst+1 ){
+            hasLeftBoundary = true;
+            boundaryValidIndex = nyFirst - j + 1;
+         } else if( j > nxLast-3 ){
+            hasRightBoundary = true;
+            boundaryValidIndex = nyLast - j;
+         }
+
          // find numerical flux
-         status = getNumericalFluxG( tU1, tU2, tU, tF, talpha, tF_, tMaxWaveSpeed );
+         status = getNumericalFluxG( tU1, tU2, tU, tF, talpha, tF_, tMaxWaveSpeed, hasLeftBoundary, hasRightBoundary, boundaryValidIndex );
          if( status.isError ){
             status.message += "\n! SpatialMethodEnoLF::integrate: G flux";
             return status;
@@ -232,6 +254,9 @@ t_status SpatialMethodEnoLF::getNumericalFluxF
    , double    alpha[PRB_DIM]
    , double    F_[PRB_DIM]
    , double   &maxWaveSpeed
+   , bool      hasLeftBoundary
+   , bool      hasRightBoundary
+   , size_t    boundaryIndex
 ){
    const auto TNFIRST = size_t{2};
    // current index
@@ -271,6 +296,12 @@ t_status SpatialMethodEnoLF::getNumericalFluxF
          for( auto m = size_t{0}; m < PRB_DIM; m++ ){
             RU[k][l] += lv[k][m]*U[m][l];
             RF[k][l] += lv[k][m]*F[m][l];
+         }
+         if( hasLeftBoundary && l < boundaryIndex && a[k] > 0.0 ){
+            RF[k][l] = 0.0;
+         }
+         if( hasRightBoundary && l > boundaryIndex && a[k] < 0.0 ){
+            RF[k][l] = 0.0;
          }
       }
    }
@@ -330,6 +361,9 @@ t_status SpatialMethodEnoLF::getNumericalFluxG
    , double    alpha[PRB_DIM]
    , double    G_[PRB_DIM]
    , double   &maxWaveSpeed
+   , bool      hasLeftBoundary
+   , bool      hasRightBoundary
+   , size_t    boundaryIndex
 ){
    // invert x and y axis
    std::swap( U1[1], U1[2] ); std::swap( U1[4], U1[5] );
@@ -340,7 +374,7 @@ t_status SpatialMethodEnoLF::getNumericalFluxG
    }
 
    // find flux for inverted x and y
-   auto status = getNumericalFluxF( U1, U2, U, G, alpha, G_, maxWaveSpeed );
+   auto status = getNumericalFluxF( U1, U2, U, G, alpha, G_, maxWaveSpeed, hasLeftBoundary, hasRightBoundary, boundaryIndex );
    if( status.status != ReturnStatus::OK ){
       status.message += "\n! SpatialMethodEnoLF::getNumericalFluxG";
    }

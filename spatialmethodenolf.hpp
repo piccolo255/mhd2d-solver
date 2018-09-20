@@ -35,14 +35,20 @@ class SpatialMethodEnoLF : public SpatialMethodEno
                                 , double  F[PRB_DIM][8]
                                 , double  alpha[PRB_DIM]
                                 , double  F_[PRB_DIM]
-                                , double &maxWaveSpeed );
+                                , double &maxWaveSpeed
+                                , bool    hasLeftBoundary
+                                , bool    hasRightBoundary
+                                , size_t  boundaryIndex );
       t_status getNumericalFluxG( double  U1[PRB_DIM]
                                 , double  U2[PRB_DIM]
                                 , double  U[PRB_DIM][8]
                                 , double  G[PRB_DIM][8]
                                 , double  alpha[PRB_DIM]
                                 , double  G_[PRB_DIM]
-                                , double &maxWaveSpeed );
+                                , double &maxWaveSpeed
+                                , bool    hasLeftBoundary
+                                , bool    hasRightBoundary
+                                , size_t  boundaryIndex );
 };
 
 #endif // SPATIALMETHODENOLF_HPP
