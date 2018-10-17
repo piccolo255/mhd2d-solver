@@ -70,7 +70,7 @@ t_status SpatialMethodEnoLF::integrate
    }
 
    for( auto i = nxFirst-1; i < nxLast; i++ ){
-      for( auto j = nyFirst-1; j < nxLast; j++ ){
+      for( auto j = nyFirst-1; j < nyLast; j++ ){
          // skip corner
          if( i < nxFirst && j < nxFirst ) continue;
 
