@@ -298,10 +298,12 @@ t_status SpatialMethodEnoLF::getNumericalFluxF
             RF[k][l] += lv[k][m]*F[m][l];
          }
          if( hasLeftBoundary && l < boundaryIndex && a[k] > 0.0 ){
-            RF[k][l] = 0.0;
+            RF[k][l] = RF[k][boundaryIndex];
+//            OUT << "LB " << boundaryIndex << " -> " << RF[k][l] << "\n";
          }
          if( hasRightBoundary && l > boundaryIndex && a[k] < 0.0 ){
-            RF[k][l] = 0.0;
+            RF[k][l] = RF[k][boundaryIndex];
+//            OUT << "RB " << boundaryIndex << " -> " << RF[k][l] << "\n";
          }
       }
    }
