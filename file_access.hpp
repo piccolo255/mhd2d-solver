@@ -38,6 +38,12 @@ void readProblemPlasmaSheet
    , t_params &params
    , t_data   &data );
 
+// Read settings from property tree: Wave test problem
+void readProblemWaveTest
+   ( boost::property_tree::ptree &pt
+   , t_params &params
+   , t_data   &data );
+
 // Print info about the binary file structure (with hints for plotting with GNUplot)
 void outputBinaryHintFile
    ( const std::string filename

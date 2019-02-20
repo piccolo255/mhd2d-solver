@@ -1,6 +1,9 @@
 #include "mhd2d.hpp"
 #include "file_access.hpp"
 
+// needed for eigensystem calculation in readProblemWaveTest
+#include "scheme_eno.hpp"
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void openFile
    ( t_output &output
@@ -126,6 +129,8 @@ void inputData
       readProblemOTVortex( pt, params, data );
    } else if( tempstr == "plasma sheet" ){
       readProblemPlasmaSheet( pt, params, data );
+   } else if( tempstr == "wave test" ){
+      readProblemWaveTest( pt, params, data );
    } else {
       criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
                    + "inputData: in section [problem], key \"type\":\n"
@@ -878,6 +883,155 @@ void readProblemPlasmaSheet
          criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
                       + "readProblemPlasmaSheet: in section [problem], key \"" + boundary_key + "\":\n"
                       + "Unknown boundary condition: " + tempstr );
+         break;
+      case BoundaryCondition::Dirichlet:
+         params.boundary_dirichlet_U[params.b_left  ] = createVectors( PRB_DIM, NY );
+         params.boundary_dirichlet_U[params.b_top   ] = createVectors( PRB_DIM, NX );
+         params.boundary_dirichlet_U[params.b_right ] = createVectors( PRB_DIM, NY );
+         params.boundary_dirichlet_U[params.b_bottom] = createVectors( PRB_DIM, NX );
+         for( int k = 0; k < PRB_DIM; k++ ){
+            for( int j = NYFIRST; j < NYLAST; j++ ){
+               params.boundary_dirichlet_U[params.b_left ][k][j] = data.U[k][NXFIRST ][j];
+               params.boundary_dirichlet_U[params.b_right][k][j] = data.U[k][NXLAST-1][j];
+            }
+            for( int i = NXFIRST; i < NXLAST; i++ ){
+               params.boundary_dirichlet_U[params.b_bottom][k][i] = data.U[k][i][NYFIRST ];
+               params.boundary_dirichlet_U[params.b_top   ][k][i] = data.U[k][i][NYLAST-1];
+            }
+         }
+         break;
+      case BoundaryCondition::Periodic:
+      case BoundaryCondition::Neumann:
+      case BoundaryCondition::Open:
+         break;
+      }
+   }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void readProblemWaveTest
+   ( boost::property_tree::ptree &pt
+   , t_params &params
+   , t_data   &data
+){
+   // Domain size and position
+   auto Lx = readEntry<double>( pt, "problem", "Lx", 1.0 ); params.dx = Lx/params.nx;
+   auto Ly = readEntry<double>( pt, "problem", "Ly", 1.0 ); params.dy = Ly/params.ny;
+   params.start_x = readEntry<double>( pt, "problem", "start_x", -0.5 );
+   params.start_y = readEntry<double>( pt, "problem", "start_y", -0.5 );
+
+   // give meaningful names
+   t_matrix U_rho = data.U[0];
+   t_matrix U_u   = data.u[0];
+   t_matrix U_v   = data.u[1];
+   t_matrix U_w   = data.u[2];
+   t_matrix U_bx  = data.U[4];
+   t_matrix U_by  = data.U[5];
+   t_matrix U_bz  = data.U[6];
+   t_matrix U_p   = data.p;
+   auto U_natural = std::vector<t_matrix>{ U_rho, U_u, U_v, U_w, U_bx, U_by, U_bz, U_p };
+
+   // read average values
+   auto U_natural_avg = std::vector<double>{};
+   U_natural_avg.resize( PRB_DIM );
+   U_natural_avg[0] = readEntry<double>( pt, "problem", "rho",  1.0   );
+   U_natural_avg[1] = readEntry<double>( pt, "problem", "u",    0.0   );
+   U_natural_avg[2] = readEntry<double>( pt, "problem", "v",    0.0   );
+   U_natural_avg[3] = readEntry<double>( pt, "problem", "w",    0.0   );
+   U_natural_avg[4] = readEntry<double>( pt, "problem", "Bx",   0.0   );
+   U_natural_avg[5] = readEntry<double>( pt, "problem", "By",   0.0   );
+   U_natural_avg[6] = readEntry<double>( pt, "problem", "Bz",   0.0   );
+   U_natural_avg[7] = readEntry<double>( pt, "problem", "p",    1.0   );
+
+   // read problem options
+   auto wave_angle  = readEntry<double>( pt, "problem", "angle",        0.0      );
+   auto wave_length = readEntry<double>( pt, "problem", "wavelength",   1.0      );
+   auto epsilon     = readEntry<double>( pt, "problem", "epsilon",      1.0e-8   );
+   auto wave_type   = readEntry<std::string>( pt, "problem", "wave", "entropy" );
+
+   // get eigenvector for wave being tested
+   double U_con[PRB_DIM];
+   for( size_t k = 0; k < PRB_DIM; k++ ){
+      U_con[k] = U_natural_avg[k];
+   }
+   double u[PRB_DIM];
+   u[0] = U_natural_avg[1];
+   u[1] = U_natural_avg[2];
+   u[2] = U_natural_avg[3];
+   auto p = U_natural_avg[7];
+   toConservationPoint( params, U_con, u, p );
+   double eigenvalues[PRB_DIM];
+   double eigenvectorsleft[PRB_DIM][PRB_DIM];
+   double eigenvectorsright[PRB_DIM][PRB_DIM];
+   auto retval = getEigens_F( U_con, U_con, params.gamma, eigenvalues, eigenvectorsleft, eigenvectorsright, true  );
+   if( retval.isError ){
+      criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                   + "readProblemWaveTest: failed to calculate eigensystem from average values.\n"
+                   + retval.message );
+   }
+   double *eigenvector;
+   if( wave_type == "negative fast magnetosonic" ){
+      eigenvector = eigenvectorsright[0];
+   } else if( wave_type == "negative alfven" ){
+      eigenvector = eigenvectorsright[1];
+   } else if( wave_type == "negative slow magnetosonic" ){
+      eigenvector = eigenvectorsright[2];
+   } else if( wave_type == "entropy" ){
+      eigenvector = eigenvectorsright[3];
+   } else if( wave_type == "positive slow magnetosonic" ){
+      eigenvector = eigenvectorsright[4];
+   } else if( wave_type == "positive alfven" ){
+      eigenvector = eigenvectorsright[5];
+   } else if( wave_type == "positive fast magnetosonic" ){
+      eigenvector = eigenvectorsright[6];
+   } else {
+      criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                   + "readProblemWaveTest: in section [problem], key \"wave\":\n"
+                   + "Unknown wave type: " + wave_type );
+   }
+   OUT << "chosen eigenvector: ( "
+       << eigenvector[0] << ", "
+       << eigenvector[1] << ", "
+       << eigenvector[2] << ", "
+       << eigenvector[3] << ", "
+       << eigenvector[4] << ", "
+       << eigenvector[5] << ", "
+       << eigenvector[6] << ", "
+       << eigenvector[7] << ")\n";
+
+   auto x = double{};
+   auto y = double{};
+   auto c = cos( wave_angle );
+   auto s = sin( wave_angle );
+   auto scale = 2*M_PI / wave_length;
+   for( size_t k = 0; k < PRB_DIM; k++ ){
+      for( size_t i = NXFIRST; i < NXLAST; i++ ){
+         for( size_t j = NYFIRST; j < NYLAST; j++ ){
+            x = params.start_x + (i-NXFIRST)*params.dx;
+            y = params.start_y + (j-NYFIRST)*params.dy;
+            U_natural[k][i][j] = U_natural_avg[k]
+                               + epsilon*eigenvector[k]*cos( (x*c+y*s)*scale );
+         }
+      }
+   }
+
+   toConservationData( params, data );
+
+   auto boundary_name = std::vector<std::string>( params.b_count );
+   boundary_name[params.b_left  ] = "left";
+   boundary_name[params.b_top   ] = "top";
+   boundary_name[params.b_right ] = "right";
+   boundary_name[params.b_bottom] = "bottom";
+   for( int b = 0; b < params.b_count; b++ ){
+      auto boundary_key = std::string{"boundary "} + boundary_name[b];
+      auto boundary_type = readEntry<std::string>( pt, "problem", boundary_key, "open" );
+
+      params.boundary[b] = fromString<BoundaryCondition>( boundary_type );
+      switch( params.boundary[b] ){
+      case BoundaryCondition::Undefined:
+         criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                      + "readProblemWaveTest: in section [problem], key \"" + boundary_key + "\":\n"
+                      + "Unknown boundary condition: " + boundary_type );
          break;
       case BoundaryCondition::Dirichlet:
          params.boundary_dirichlet_U[params.b_left  ] = createVectors( PRB_DIM, NY );
