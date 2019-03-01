@@ -950,20 +950,20 @@ void readProblemWaveTest
    auto wave_type   = readEntry<std::string>( pt, "problem", "wave", "entropy" );
 
    // get eigenvector for wave being tested
-   double U_con[PRB_DIM];
+   double U_con_avg[PRB_DIM];
    for( size_t k = 0; k < PRB_DIM; k++ ){
-      U_con[k] = U_natural_avg[k];
+      U_con_avg[k] = U_natural_avg[k];
    }
    double u[PRB_DIM];
    u[0] = U_natural_avg[1];
    u[1] = U_natural_avg[2];
    u[2] = U_natural_avg[3];
    auto p = U_natural_avg[7];
-   toConservationPoint( params, U_con, u, p );
+   toConservationPoint( params, U_con_avg, u, p );
    double eigenvalues[PRB_DIM];
    double eigenvectorsleft[PRB_DIM][PRB_DIM];
    double eigenvectorsright[PRB_DIM][PRB_DIM];
-   auto retval = getEigens_F( U_con, U_con, params.gamma, eigenvalues, eigenvectorsleft, eigenvectorsright, true  );
+   auto retval = getEigens_F( U_con_avg, U_con_avg, params.gamma, eigenvalues, eigenvectorsleft, eigenvectorsright, true  );
    if( retval.isError ){
       criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
                    + "readProblemWaveTest: failed to calculate eigensystem from average values.\n"
@@ -1009,13 +1009,13 @@ void readProblemWaveTest
          for( size_t j = NYFIRST; j < NYLAST; j++ ){
             x = params.start_x + (i-NXFIRST)*params.dx;
             y = params.start_y + (j-NYFIRST)*params.dy;
-            U_natural[k][i][j] = U_natural_avg[k]
-                               + epsilon*eigenvector[k]*cos( (x*c+y*s)*scale );
+            data.U[k][i][j] = U_con_avg[k]
+                            + epsilon*eigenvector[k]*cos( (x*c+y*s)*scale );
          }
       }
    }
 
-   toConservationData( params, data );
+   toNaturalData( params, data );
 
    auto boundary_name = std::vector<std::string>( params.b_count );
    boundary_name[params.b_left  ] = "left";
