@@ -248,7 +248,7 @@ t_status SpatialMethodEno::getEigensF
    auto bx = 0.5 * ( U1[4] + U2[4] );
    auto by = 0.5 * ( U1[5] + U2[5] );
    auto bz = 0.5 * ( U1[6] + U2[6] );
-   //auto e  = 0.5 * ( U1[7] + U2[7] );
+   auto e  = 0.5 * ( U1[7] + U2[7] );
 
    if( r <= 0.0 ){
       return { true, ReturnStatus::ErrorNegativeDensity
@@ -511,6 +511,123 @@ t_status SpatialMethodEno::getEigensF
       rv[4][k] *= csfactor;
       lv[2][k] *= csfactor;
       lv[4][k] *= csfactor;
+   }
+//   {
+//      // try to fix
+//      for( auto k = size_t{0}; k < PRB_DIM; k++ ){
+//         rv[0][k] *=  0.5;
+//         lv[0][k] *=  0.5;
+//         rv[1][k] *= -1.0;
+//         lv[1][k] *= -1.0;
+//         rv[5][k] *= -1.0;
+//         lv[5][k] *= -1.0;
+//         rv[6][k] *=  0.5;
+//         lv[6][k] *=  0.5;
+//      }
+//   }
+//   {
+//      // LR matrix, should be diag(1,1,1,1,0,1,1,1)
+//      for( size_t k = 0u; k < PRB_DIM; k++ ){
+//         for( size_t l = 0u; l < PRB_DIM; l++ ){
+//            auto sum = 0.0;
+//            for( size_t m = 0u; m < PRB_DIM; m++ ){
+//               sum += lv[m][k]*rv[m][l];
+//            }
+//            if( sum < 1.0e-10 ) sum = 0.0;
+//            OUT << sum << "\t";
+//         }
+//         OUT << "\n";
+//      }
+//      OUT << "------------------------\n";
+//   }
+   if(0){
+      // LAR matrix
+      double A[PRB_DIM][PRB_DIM], LA[PRB_DIM][PRB_DIM];
+      A[0][0] = u;
+      A[0][1] = u*u + 1.0/2.0*(gamma-1.0)*uu;
+      A[0][2] = v*u;
+      A[0][3] = w*u;
+      A[0][4] = 0;
+      A[0][5] = 0;
+      A[0][6] = 0;
+      A[0][7] = 1.0/2.0*(gamma-1.0)*uu;
+      A[1][0] = 1;
+      A[1][1] = u + 1.0/2.0*(gamma-1.0)*u;
+      A[1][2] = v;
+      A[1][3] = w;
+      A[1][4] = 0;
+      A[1][5] = by/r;
+      A[1][6] = bz/r;
+      A[1][7] = 1.0/r*(e+(gamma-1.0)*(e-0.5*r*(3.0*u*u+v*v+w*w)-0.5*bb)+0.5*bb) - bx*by/r;
+      A[2][0] = 0;
+      A[2][1] = -(gamma-1.0)*v;
+      A[2][2] = u;
+      A[2][3] = 0;
+      A[2][4] = 0;
+      A[2][5] = -bx/r;
+      A[2][6] = 0;
+      A[2][7] = -u*(gamma-1.0)*v - bx*by/r;
+      A[3][0] = 0;
+      A[3][1] = -(gamma-1.0)*w;
+      A[3][2] = 0;
+      A[3][3] = u;
+      A[3][4] = 0;
+      A[3][5] = 0;
+      A[3][6] = -bx/r;
+      A[3][7] = -u*(gamma-1.0)*w - bx*bz/r;
+      A[4][0] = 0;
+      A[4][1] = -2.0*bx - (gamma-1.0)*bx + bx;
+      A[4][2] = by;
+      A[4][3] = bz;
+      A[4][4] = 0;
+      A[4][5] = v;
+      A[4][6] = w;
+      A[4][7] = u*( -(gamma-1.0)*bx + bx ) - ( 2.0*u*bx + v*by + w*bz );
+      A[5][0] = 0;
+      A[5][1] = -(gamma-1.0)*by + by;
+      A[5][2] = bx;
+      A[5][3] = 0;
+      A[5][4] = 0;
+      A[5][5] = u;
+      A[5][6] = 0;
+      A[5][7] = u*( -(gamma-1.0)*by + by ) - v*bx;
+      A[6][0] = 0;
+      A[6][1] = -(gamma-1.0)*bz + bz;
+      A[6][2] = 0;
+      A[6][3] = bz;
+      A[6][4] = 0;
+      A[6][5] = 0;
+      A[6][6] = u;
+      A[6][7] = u*( -(gamma-1.0)*bz + bz ) - w*bx;
+      A[7][0] = 0;
+      A[7][1] = gamma-1.0;
+      A[7][2] = 0;
+      A[7][3] = 0;
+      A[7][4] = 0;
+      A[7][5] = 0;
+      A[7][6] = 0;
+      A[7][7] = u*gamma;
+      for( size_t k = 0u; k < PRB_DIM; k++ ){
+         for( size_t l = 0u; l < PRB_DIM; l++ ){
+            LA[l][k] = 0.0;
+            for( size_t m = 0u; m < PRB_DIM; m++ ){
+               LA[l][k] += lv[k][m]*A[l][m];
+            }
+
+         }
+      }
+      for( size_t k = 0u; k < PRB_DIM; k++ ){
+         for( size_t l = 0u; l < PRB_DIM; l++ ){
+            auto sum = 0.0;
+            for( size_t m = 0u; m < PRB_DIM; m++ ){
+               sum += LA[k][m]*rv[m][l];
+            }
+            if( sum < 1.0e-12 ) sum = 0.0;
+            OUT << sum << "\t";
+         }
+         OUT << "\n";
+      }
+      OUT << "------------------------\n";
    }
 
    return status;

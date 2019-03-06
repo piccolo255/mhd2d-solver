@@ -274,6 +274,17 @@ t_status SpatialMethodEnoLF::getNumericalFluxF
          }
       }
    }
+//   {
+//      OUT << "\n";
+//      for( size_t k = 0u; k < PRB_DIM; k++ ){
+//         for( size_t l = i-1; l < i+2; l++ ){
+//            auto diff = RF[k][l+1]-RF[k][l];
+//            OUT << (diff>1.e-12?diff:0) << "\t";
+//         }
+//         OUT << "\n";
+//      }
+//      OUT << "------------------------\n";
+//   }
 
    // positive part of the flux splitting
    for( auto k = size_t{0}; k < PRB_DIM; k++ ){
