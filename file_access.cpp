@@ -944,10 +944,14 @@ void readProblemWaveTest
    U_natural_avg[7] = readEntry<double>( pt, "problem", "p",    1.0   );
 
    // read problem options
-   auto wave_angle  = readEntry<double>( pt, "problem", "angle",        0.0      );
-   auto wave_length = readEntry<double>( pt, "problem", "wavelength",   1.0      );
-   auto epsilon     = readEntry<double>( pt, "problem", "epsilon",      1.0e-8   );
-   auto wave_type   = readEntry<std::string>( pt, "problem", "wave", "entropy" );
+   auto wavenumber_x = readEntry<int>( pt, "problem", "wavenumber x", 1 );
+   auto wavenumber_y = readEntry<int>( pt, "problem", "wavenumber y", 0 );
+   if( wavenumber_x < 0 || wavenumber_y < 0 ){
+      criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
+                   + "readProblemWaveTest: wavenumber must be nonnegative.\n" );
+   }
+   auto epsilon = readEntry<double>( pt, "problem", "epsilon", 1.0e-8 );
+   auto wave_type = readEntry<std::string>( pt, "problem", "wave", "entropy" );
 
    // get eigenvector for wave being tested
    double U_con_avg[PRB_DIM];
@@ -1001,21 +1005,36 @@ void readProblemWaveTest
 
    auto x = double{};
    auto y = double{};
-   auto c = cos( wave_angle );
-   auto s = sin( wave_angle );
-   auto scale = 2*M_PI / wave_length;
+   auto scale_x = 2*M_PI / Lx;
+   auto scale_y = 2*M_PI / Ly;
    for( size_t k = 0; k < PRB_DIM; k++ ){
       for( size_t i = NXFIRST; i < NXLAST; i++ ){
          for( size_t j = NYFIRST; j < NYLAST; j++ ){
             x = params.start_x + (i-NXFIRST)*params.dx;
             y = params.start_y + (j-NYFIRST)*params.dy;
             data.U[k][i][j] = U_con_avg[k]
-                            + epsilon*eigenvector[k]*cos( (x*c+y*s)*scale );
+                            + epsilon*eigenvector[k]*std::cos( scale_x*wavenumber_x*x + scale_y*wavenumber_y*y );
          }
       }
    }
-
    toNaturalData( params, data );
+
+   auto rot_angle = std::atan2( wavenumber_y, wavenumber_x );
+   auto ct = std::cos( rot_angle );
+   auto st = std::sin( rot_angle );
+   for( size_t i = NXFIRST; i < NXLAST; i++ ){
+      for( size_t j = NYFIRST; j < NYLAST; j++ ){
+         auto rot_u  = ct*U_u[i][j]  - st*U_v[i][j];
+         auto rot_v  = st*U_u[i][j]  + ct*U_v[i][j];
+         auto rot_bx = ct*U_bx[i][j] - st*U_by[i][j];
+         auto rot_by = st*U_bx[i][j] + ct*U_by[i][j];
+         U_u[i][j]  = rot_u;
+         U_v[i][j]  = rot_v;
+         U_bx[i][j] = rot_bx;
+         U_by[i][j] = rot_by;
+      }
+   }
+   toConservationData( params, data );
 
    auto boundary_name = std::vector<std::string>( params.b_count );
    boundary_name[params.b_left  ] = "left";
