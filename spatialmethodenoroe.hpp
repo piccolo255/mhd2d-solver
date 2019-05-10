@@ -18,6 +18,7 @@ class SpatialMethodEnoRoe : public SpatialMethodEno
 
       t_status integrate( t_matrices    U
                         , t_matrices    UL
+                        , t_vectors     borderFluxLRUD
                         , double       &dtIdeal
                         ) override;
 

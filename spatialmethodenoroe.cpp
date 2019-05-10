@@ -33,6 +33,7 @@ SpatialMethodEnoRoe::~SpatialMethodEnoRoe
 t_status SpatialMethodEnoRoe::integrate
    ( t_matrices   U
    , t_matrices   UL
+   , t_vectors     borderFluxLRUD
    , double      &dtIdeal
 ){
    // for processing function return values

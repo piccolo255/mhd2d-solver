@@ -32,7 +32,7 @@ t_status TimeIntegrationEuler::step
    auto retval    = t_status{};
 
    // Spatial integration, check for errors
-   retval = method->integrate( U, UL, dtIdeal );
+   retval = method->integrate( U, UL, nullptr, dtIdeal );
    if( retval.isError ){
       retval.message += "\n! TimeIntegrationEuler::step: spatial integration";
       return retval;

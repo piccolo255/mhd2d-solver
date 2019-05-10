@@ -42,7 +42,7 @@ t_status TimeIntegrationRK3::step
    auto done = bool{false};
 
    // First step: spatial integration, check for errors
-   retval = method->integrate( U, UL, dtIdeal );
+   retval = method->integrate( U, UL, nullptr, dtIdeal );
    if( retval.isError ){
       retval.message += "\n! TimeIntegrationRK3::step: (first) spatial integration";
       return retval;
@@ -65,7 +65,7 @@ t_status TimeIntegrationRK3::step
                U1[k][i][j] = U[k][i][j] + dt*UL[k][i][j];
 
       // Second step: spatial integration, check for errors
-      retval = method->integrate( U1, UL, dtIdeal );
+      retval = method->integrate( U1, UL, nullptr, dtIdeal );
       if( retval.isError ){
          retval.message += "\n! TimeIntegrationRK3::step: (second) spatial integration";
          return retval;
@@ -88,7 +88,7 @@ t_status TimeIntegrationRK3::step
                U2[k][i][j] = (3.0/4.0)*U[k][i][j] + (1.0/4.0)*U1[k][i][j] + (1.0/4.0)*dt*UL[k][i][j];
 
       // Final step: spatial integration, check for errors
-      retval = method->integrate( U2, UL, dtIdeal );
+      retval = method->integrate( U2, UL, nullptr, dtIdeal );
       if( retval.isError ){
          retval.message += "\n! TimeIntegrationRK3::step: (last) spatial integration";
          return retval;

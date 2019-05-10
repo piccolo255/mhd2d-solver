@@ -33,6 +33,7 @@ SpatialMethodEnoLF::~SpatialMethodEnoLF
 t_status SpatialMethodEnoLF::integrate
    ( t_matrices   U
    , t_matrices   UL
+   , t_vectors     borderFluxLRUD
    , double      &dtIdeal
 ){
    // for processing function return values
