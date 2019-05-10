@@ -15,6 +15,15 @@ TimeIntegrationRK3::TimeIntegrationRK3
    U1 = createMatrices( PRB_DIM, nxTotal, nyTotal );
    U2 = createMatrices( PRB_DIM, nxTotal, nyTotal );
    UL = createMatrices( PRB_DIM, nxTotal, nyTotal );
+
+   borderFlux1.left  = createVectors( PRB_DIM, nyTotal );
+   borderFlux1.right = createVectors( PRB_DIM, nyTotal );
+   borderFlux1.up    = createVectors( PRB_DIM, nxTotal );
+   borderFlux1.down  = createVectors( PRB_DIM, nxTotal );
+   borderFlux2.left  = createVectors( PRB_DIM, nyTotal );
+   borderFlux2.right = createVectors( PRB_DIM, nyTotal );
+   borderFlux2.up    = createVectors( PRB_DIM, nxTotal );
+   borderFlux2.down  = createVectors( PRB_DIM, nxTotal );
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -24,13 +33,22 @@ TimeIntegrationRK3::~TimeIntegrationRK3
    freeMatrices( U1 );
    freeMatrices( U2 );
    freeMatrices( UL );
+
+   freeVectors( borderFlux1.left  );
+   freeVectors( borderFlux1.right );
+   freeVectors( borderFlux1.up    );
+   freeVectors( borderFlux1.down  );
+   freeVectors( borderFlux2.left  );
+   freeVectors( borderFlux2.right );
+   freeVectors( borderFlux2.up    );
+   freeVectors( borderFlux2.down  );
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 t_status TimeIntegrationRK3::step
-   ( t_matrices   U
-   , t_vectors    borderFluxLRUD
-   , double      &dtCurrent
+   ( t_matrices      U
+   , borderVectors   borderFlux
+   , double         &dtCurrent
 ){
    auto dt        = dtCurrent;
    auto dtIdeal   = double{0.0};
@@ -43,7 +61,7 @@ t_status TimeIntegrationRK3::step
    auto done = bool{false};
 
    // First step: spatial integration, check for errors
-   retval = method->integrate( U, UL, nullptr, dtIdeal );
+   retval = method->integrate( U, UL, borderFlux, dtIdeal );
    if( retval.isError ){
       retval.message += "\n! TimeIntegrationRK3::step: (first) spatial integration";
       return retval;
@@ -66,7 +84,7 @@ t_status TimeIntegrationRK3::step
                U1[k][i][j] = U[k][i][j] + dt*UL[k][i][j];
 
       // Second step: spatial integration, check for errors
-      retval = method->integrate( U1, UL, nullptr, dtIdeal );
+      retval = method->integrate( U1, UL, borderFlux1, dtIdeal );
       if( retval.isError ){
          retval.message += "\n! TimeIntegrationRK3::step: (second) spatial integration";
          return retval;
@@ -89,7 +107,7 @@ t_status TimeIntegrationRK3::step
                U2[k][i][j] = (3.0/4.0)*U[k][i][j] + (1.0/4.0)*U1[k][i][j] + (1.0/4.0)*dt*UL[k][i][j];
 
       // Final step: spatial integration, check for errors
-      retval = method->integrate( U2, UL, nullptr, dtIdeal );
+      retval = method->integrate( U2, UL, borderFlux2, dtIdeal );
       if( retval.isError ){
          retval.message += "\n! TimeIntegrationRK3::step: (last) spatial integration";
          return retval;
@@ -110,6 +128,17 @@ t_status TimeIntegrationRK3::step
          for( auto i = nxFirst; i < nxLast; i++ )
             for( auto j = nyFirst; j < nyLast; j++ )
                U[k][i][j] = (1.0/3.0)*U[k][i][j] + (2.0/3.0)*U2[k][i][j] + (2.0/3.0)*dt*UL[k][i][j];
+
+      for( auto k = size_t{0}; k < PRB_DIM; k++ ){
+         for( auto i = nxFirst; i < nxLast; i++ ){
+            borderFlux.up[k][i]   = (1.0/6.0)*borderFlux.up[k][i]   + (1.0/6.0)*borderFlux1.up[k][i]   + (2.0/3.0)*borderFlux2.up[k][i];
+            borderFlux.down[k][i] = (1.0/6.0)*borderFlux.down[k][i] + (1.0/6.0)*borderFlux1.down[k][i] + (2.0/3.0)*borderFlux2.down[k][i];
+         }
+         for( auto j = nyFirst; j < nyLast; j++ ){
+            borderFlux.left[k][j]  = (1.0/6.0)*borderFlux.left[k][j]  + (1.0/6.0)*borderFlux1.left[k][j]  + (2.0/3.0)*borderFlux2.left[k][j];
+            borderFlux.right[k][j] = (1.0/6.0)*borderFlux.right[k][j] + (1.0/6.0)*borderFlux1.right[k][j] + (2.0/3.0)*borderFlux2.right[k][j];
+         }
+      }
 
       done = true;
    }

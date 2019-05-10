@@ -16,10 +16,10 @@ class SpatialMethodEnoRoe : public SpatialMethodEno
                                   );
       virtual ~SpatialMethodEnoRoe();
 
-      t_status integrate( t_matrices    U
-                        , t_matrices    UL
-                        , t_vectors     borderFluxLRUD
-                        , double       &dtIdeal
+      t_status integrate( t_matrices      U
+                        , t_matrices      UL
+                        , borderVectors   borderFlux
+                        , double         &dtIdeal
                         ) override;
 
    protected:

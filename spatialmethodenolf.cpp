@@ -31,10 +31,10 @@ SpatialMethodEnoLF::~SpatialMethodEnoLF
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 t_status SpatialMethodEnoLF::integrate
-   ( t_matrices   U
-   , t_matrices   UL
-   , t_vectors     borderFluxLRUD
-   , double      &dtIdeal
+   ( t_matrices      U
+   , t_matrices      UL
+   , borderVectors   borderFlux
+   , double         &dtIdeal
 ){
    // for processing function return values
    auto status = t_status{};

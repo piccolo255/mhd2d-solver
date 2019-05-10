@@ -88,6 +88,10 @@ void inputData
    data.U = createMatrices( PRB_DIM, NX, NY );
    data.u = createMatrices( VEL_DIM, NX, NY );
    data.p = createMatrix( NX, NY );
+   data.borderFlux.left  = createVectors( PRB_DIM, NY );
+   data.borderFlux.right = createVectors( PRB_DIM, NY );
+   data.borderFlux.up    = createVectors( PRB_DIM, NX );
+   data.borderFlux.down  = createVectors( PRB_DIM, NX );
 
    // Time stepping mode
    // - keep a constant dt, or

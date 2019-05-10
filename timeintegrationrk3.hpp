@@ -16,9 +16,9 @@ class TimeIntegrationRK3 : public TimeIntegrationMethod
                                  );
       virtual ~TimeIntegrationRK3();
 
-      t_status step( t_matrices   U
-                   , t_vectors    borderFluxLRUD
-                   , double      &dtCurrent
+      t_status step( t_matrices     U
+                   , borderVectors  borderFlux
+                   , double        &dtCurrent
                    ) override;
 
    protected:
@@ -27,6 +27,9 @@ class TimeIntegrationRK3 : public TimeIntegrationMethod
       t_matrices U1;
       t_matrices U2;
       t_matrices UL;
+
+      borderVectors borderFlux1;
+      borderVectors borderFlux2;
 };
 
 #endif // TIMEINTEGRATIONRK3_HPP

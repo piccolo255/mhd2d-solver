@@ -178,11 +178,21 @@ typedef struct {
 } t_params;
 
 typedef struct {
+   t_vectors left;
+   t_vectors right;
+   t_vectors up;
+   t_vectors down;
+} borderVectors;
+
+typedef struct {
    // Conserved variables; density, momentum, magnetic field, energy
    t_matrices U;
    // Primitive variables; velocity and pressure
    t_matrices u;
    t_matrix   p;
+   // Border fluxes
+   borderVectors borderFlux;
+   // Time
    double dt;
    double t_current;
 } t_data;

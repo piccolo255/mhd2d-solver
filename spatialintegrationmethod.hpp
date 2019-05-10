@@ -19,10 +19,10 @@ class SpatialIntegrationMethod
       void initializeDirichletBoundaries( t_matrices U
                                         );
 
-      virtual t_status integrate( t_matrices    U
-                                , t_matrices    UL
-                                , t_vectors     borderFluxLRUD
-                                , double       &dtIdeal
+      virtual t_status integrate( t_matrices       U
+                                , t_matrices       UL
+                                , borderVectors    borderFlux
+                                , double          &dtIdeal
                                 ) = 0;
 
       static size_t requiredBufferWidth();

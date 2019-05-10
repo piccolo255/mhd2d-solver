@@ -24,16 +24,16 @@ TimeIntegrationEuler::~TimeIntegrationEuler
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 t_status TimeIntegrationEuler::step
-   ( t_matrices   U
-   , t_vectors    borderFluxLRUD
-   , double      &dtCurrent
+   ( t_matrices      U
+   , borderVectors   borderFlux
+   , double         &dtCurrent
 ){
    auto dt        = dtCurrent;
    auto dtIdeal   = double{0.0};
    auto retval    = t_status{};
 
    // Spatial integration, check for errors
-   retval = method->integrate( U, UL, nullptr, dtIdeal );
+   retval = method->integrate( U, UL, borderFlux, dtIdeal );
    if( retval.isError ){
       retval.message += "\n! TimeIntegrationEuler::step: spatial integration";
       return retval;
