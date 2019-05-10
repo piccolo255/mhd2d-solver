@@ -18,6 +18,7 @@ TimeIntegrationMethod::TimeIntegrationMethod
    , dtMin{ dtMin }
    , dtMax{ dtMax }
    , cflNumber{ cflNumber }
+   , variableTime{ cflNumber != 0.0 }
    , method{ std::move( method ) }
 {
    //ctor
@@ -35,6 +36,10 @@ t_status TimeIntegrationMethod::updateDt
    ( double   &dtCurrent
    , double    dtIdeal
 ){
+   if( !variableTime ){
+      return { false, ReturnStatus::NoChange, "" };
+   }
+
    auto dt = dtCurrent;
 
    // resize dt to fit between 0.5*cfl and cfl

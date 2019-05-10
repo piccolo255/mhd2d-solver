@@ -103,6 +103,7 @@ void inputData
    case TimeStepMode::Constant:
       params.steps  = readEntry<int>   ( pt, "time", "steps", 8     );
       params.dt_max = readEntry<double>( pt, "time", "dt",    0.125 );
+      params.cfl_number = double{ 0.0 };
       break;
    case TimeStepMode::Variable:
       params.cfl_number = readEntry<double>( pt, "time", "cfl number", 0.5 );

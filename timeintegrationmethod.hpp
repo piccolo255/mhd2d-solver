@@ -36,6 +36,7 @@ class TimeIntegrationMethod
       double   dtMin;
       double   dtMax;
       double   cflNumber;
+      bool     variableTime;
 
       std::unique_ptr<SpatialIntegrationMethod> method;
 
