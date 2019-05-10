@@ -29,6 +29,7 @@ TimeIntegrationRK3::~TimeIntegrationRK3
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 t_status TimeIntegrationRK3::step
    ( t_matrices   U
+   , t_vectors    borderFluxLRUD
    , double      &dtCurrent
 ){
    auto dt        = dtCurrent;

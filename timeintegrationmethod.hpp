@@ -18,6 +18,7 @@ class TimeIntegrationMethod
       virtual ~TimeIntegrationMethod();
 
       virtual t_status step( t_matrices   U
+                           , t_vectors    borderFluxLRUD
                            , double      &dtCurrent
                            ) = 0;
 

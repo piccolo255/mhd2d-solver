@@ -17,6 +17,7 @@ class TimeIntegrationRK3 : public TimeIntegrationMethod
       virtual ~TimeIntegrationRK3();
 
       t_status step( t_matrices   U
+                   , t_vectors    borderFluxLRUD
                    , double      &dtCurrent
                    ) override;
 

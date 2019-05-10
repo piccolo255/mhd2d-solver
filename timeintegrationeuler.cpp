@@ -25,6 +25,7 @@ TimeIntegrationEuler::~TimeIntegrationEuler
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 t_status TimeIntegrationEuler::step
    ( t_matrices   U
+   , t_vectors    borderFluxLRUD
    , double      &dtCurrent
 ){
    auto dt        = dtCurrent;

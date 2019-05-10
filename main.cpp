@@ -178,7 +178,7 @@ int main
             break;
          }
       #else
-         retval = stepper->step( data.U, data.dt );
+         retval = stepper->step( data.U, nullptr, data.dt );
       #endif // OLD_STYLE
 
       // Process the return value
