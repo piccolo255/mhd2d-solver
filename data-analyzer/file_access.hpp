@@ -15,7 +15,10 @@ void closeFile
    ( t_output &output );
 
 // File access - input from ini
-void inputData
+void readConfig
+   ( const std::string filename );
+
+void readProblemConfig
    ( const std::string filename
    , t_output &output_grid
    , t_output &output_non_grid

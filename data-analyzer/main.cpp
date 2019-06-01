@@ -28,7 +28,7 @@ int main
    }
 
    /* Initialize */
-   inputData( argv[1], output_grid, output_non_grid, params, data );
+   readConfig( argv[1] );
 
    return 0;
 }
