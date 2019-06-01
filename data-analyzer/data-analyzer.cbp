@@ -78,7 +78,12 @@
 			<Add option="-std=c++11" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="data-analyzer.hpp" />
+		<Unit filename="enums.cpp" />
+		<Unit filename="enums.hpp" />
 		<Unit filename="main.cpp" />
+		<Unit filename="vector_utilities.cpp" />
+		<Unit filename="vector_utilities.hpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />
