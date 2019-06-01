@@ -1,8 +1,11 @@
-// Local headers
+// Main header
 #include "data-analyzer.hpp"
 
 // C++ headers
 #include <iostream>
+
+// Local headers
+#include "file_access.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int main
@@ -25,7 +28,7 @@ int main
    }
 
    /* Initialize */
-   //inputData( argv[1], output_grid, output_non_grid, params, data );
+   inputData( argv[1], output_grid, output_non_grid, params, data );
 
    return 0;
 }

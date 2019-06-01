@@ -4,7 +4,7 @@
  *                                                                            *
  ******************************************************************************/
 
-// Local headers
+// Main header
 #include "vector_utilities.hpp"
 
 // C headers

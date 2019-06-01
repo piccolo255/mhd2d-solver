@@ -81,6 +81,8 @@
 		<Unit filename="data-analyzer.hpp" />
 		<Unit filename="enums.cpp" />
 		<Unit filename="enums.hpp" />
+		<Unit filename="file_access.cpp" />
+		<Unit filename="file_access.hpp" />
 		<Unit filename="main.cpp" />
 		<Unit filename="vector_utilities.cpp" />
 		<Unit filename="vector_utilities.hpp" />
