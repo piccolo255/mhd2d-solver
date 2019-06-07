@@ -7,6 +7,26 @@
 // Local headers
 #include "file_access.hpp"
 
+/*************************************************************** Design memo ***
+   > Find:
+      - sheet thickness at predefined location(s)
+      - minimum sheet thickness
+      - location of minimum sheet thickness
+      - thinning front
+      - total mass in sheet
+      - total mass in lobe
+      - ?
+      - => Choose which or find all?
+   > Conditions:
+      - limit space range
+      - limit time range
+      - every N outputs
+   > Input:
+      - ini config file?
+         - parsing ini with boost property tree does not allow duplicate keys
+         - => each problem would need a unique key
+*******************************************************************************/
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int main
    ( int    argc
