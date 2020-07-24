@@ -24,11 +24,15 @@ SpatialMethodEno::SpatialMethodEno
 
    _cx = createMatrices( PRB_DIM, nxTotal, nyTotal );
    _cy = createMatrices( PRB_DIM, nxTotal, nyTotal );
+   _LUx = createMatrices( PRB_DIM, nxTotal, nyTotal );
+   _LUy = createMatrices( PRB_DIM, nxTotal, nyTotal );
    for( auto k = 0; k < PRB_DIM; k++ ){
       for( auto i = size_t{0}; i < nxTotal; i++ ){
          for( auto j = size_t{0}; j < nyTotal; j++ ){
             _cx[k][i][j] = 0.0;
             _cy[k][i][j] = 0.0;
+            _LUx[k][i][j] = 0.0;
+            _LUy[k][i][j] = 0.0;
          }
       }
    }
@@ -43,16 +47,20 @@ SpatialMethodEno::~SpatialMethodEno
 
    freeMatrices( _cx );
    freeMatrices( _cy );
+   freeMatrices( _LUx );
+   freeMatrices( _LUy );
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool SpatialMethodEno::getCharacteristicsX
    ( t_matrices cx
+   , t_matrices LUx
 ){
    for( auto k = 0; k < PRB_DIM; k++ ){
       for( auto i = size_t{0}; i < nxTotal; i++ ){
          for( auto j = size_t{0}; j < nyTotal; j++ ){
-            cx[k][i][j] = _cx[k][i][j];
+            cx[k][i][j]    = _cx[k][i][j];
+            LUx[k][i][j]   = _LUx[k][i][j];
          }
       }
    }
@@ -63,11 +71,13 @@ bool SpatialMethodEno::getCharacteristicsX
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool SpatialMethodEno::getCharacteristicsY
    ( t_matrices cy
+   , t_matrices LUy
 ){
    for( auto k = 0; k < PRB_DIM; k++ ){
       for( auto i = size_t{0}; i < nxTotal; i++ ){
          for( auto j = size_t{0}; j < nyTotal; j++ ){
-            cy[k][i][j] = _cy[k][i][j];
+            cy[k][i][j]    = _cy[k][i][j];
+            LUy[k][i][j]   = _LUy[k][i][j];
          }
       }
    }

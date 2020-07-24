@@ -88,8 +88,10 @@ void inputData
    data.U = createMatrices( PRB_DIM, NX, NY );
    data.u = createMatrices( VEL_DIM, NX, NY );
    data.p = createMatrix( NX, NY );
-   data.cx = createMatrices( PRB_DIM, NX, NY );
-   data.cy = createMatrices( PRB_DIM, NX, NY );
+   data.cx  = createMatrices( PRB_DIM, NX, NY );
+   data.cy  = createMatrices( PRB_DIM, NX, NY );
+   data.LUx = createMatrices( PRB_DIM, NX, NY );
+   data.LUy = createMatrices( PRB_DIM, NX, NY );
    data.borderFlux.left  = createVectors( PRB_DIM, NY );
    data.borderFlux.right = createVectors( PRB_DIM, NY );
    data.borderFlux.up    = createVectors( PRB_DIM, NX );
@@ -256,9 +258,10 @@ void inputData
    }
 
    // Logging parameters
-   params.log_params.r_step    = readEntry<bool>( pt, "logging", "phi correction", false );
-   params.log_params.r_end     = readEntry<bool>( pt, "logging", "phi correction final", false );
-   params.log_params.divb_step = readEntry<bool>( pt, "logging", "divb correction", false );
+   params.log_params.r_step            = readEntry<bool>( pt, "logging", "phi correction",         false );
+   params.log_params.r_end             = readEntry<bool>( pt, "logging", "phi correction final",   false );
+   params.log_params.divb_step         = readEntry<bool>( pt, "logging", "divb correction",        false );
+   params.log_params.characteristics   = readEntry<bool>( pt, "logging", "characteristics",        false );
 
    // Create the hint file that records the binary file structure
    if( output_grid.binary ){
@@ -1109,14 +1112,41 @@ void outputBinaryHintFile
    }
    fprintf( bin_hint.file, "\n" );
 
-   // characteristics: x, y, u, v, csx, csy, cax, cay, cfx, cfy
-   int char_field_count = 2 + PRB_DIM;
+   // characteristics: x, y, u, v, csx, csy, cax, cay, cfx, cfy,
+   //                  LUx[u-cfx], LUy[v-cfy], LUx[u-cax], LUy[v-cay], LUx[u-csx], LUy[v-csy],
+   //                  LUx[u], LUy[v],
+   //                  LUx[u+csx], LUy[v+csy], LUx[u+cax], LUy[v+cay], LUx[u+cfx], LUy[v+cfy]
+   int char_field_count = 2 + 2*(1+3) + 2*(3+1+3);
    fprintf( bin_hint.file, "characteristics data fields:"
-      "  1)x  2)y"
-      "  3)u  4)v"
-      "  5)csx  6)csy"
-      "  7)cax  8)cay"
-      "  9)cfx  10)cfy"
+      "\n"
+      "  1)x"
+      "  2)y"
+      "\n"
+      "  3)u"
+      "  4)v"
+      "  5)csx"
+      "  6)csy"
+      "  7)cax"
+      "  8)cay"
+      "  9)cfx"
+      "  10)cfy"
+      "\n"
+      "  11)LUx[u-cfx]"
+      "  12)LUy[v-cfy]"
+      "  13)LUx[u-cax]"
+      "  14)LUy[v-cay]"
+      "  15)LUx[u-csx]"
+      "  16)LUy[v-csy]"
+      "\n"
+      "  17)LUx[u]"
+      "  18)LUy[v]"
+      "\n"
+      "  19)LUx[u+csx]"
+      "  20)LUy[v+csy]"
+      "  21)LUx[u+cax]"
+      "  22)LUy[v+cay]"
+      "  23)LUx[u+cfx]"
+      "  24)LUy[v+cfy]"
    );
    fprintf( bin_hint.file, "\n\n" );
 
@@ -1142,7 +1172,7 @@ void outputBinaryHintFile
                            " format=\"%%%d%s\" u 1:2:3 w image\n", field_count, binary_data_type );
 
    fprintf( bin_hint.file, "\nexample gnuplot command for characteristics:\n" );
-   fprintf( bin_hint.file, "datafile = \"charvel-%s\"\n", output_grid.filename.c_str() );
+   fprintf( bin_hint.file, "datafile = \"char-%s\"\n", output_grid.filename.c_str() );
    fprintf( bin_hint.file, "index = 0\n" );
    fprintf( bin_hint.file, "nx = %d\nny = %d\n", params.nx, params.ny );
    fprintf( bin_hint.file, "set xrange [%.2f:%.2f]\nset yrange [%.2f:%.2f]\n",
@@ -1295,13 +1325,18 @@ void outputCharacteristicsBinary
    , const t_params    &params
    , const t_matrices  &cx
    , const t_matrices  &cy
+   , const t_matrices  &LUx
+   , const t_matrices  &LUy
    , double time
    , int    step
    , int    index
 ){
    // characteristic velocities (cx, cy): u-cfx, v-cfy, u-cax, v-cay, u-csx, v-csy, u, v, u+csx, v+csy, u+cax, v+cay, u+cfx, v+cfy, dummy, dummy
-   // output fields: x, y, u, v, csx, csy, cax, cay, cfx, cfy
-   int field_count = 2 + 2*4;
+   // output fields: x, y, u, v, csx, csy, cax, cay, cfx, cfy,
+   //                LUx[u-cfx], LUy[v-cfy], LUx[u-cax], LUy[v-cay], LUx[u-csx], LUy[v-csy],
+   //                LUx[u], LUy[v],
+   //                LUx[u+csx], LUy[v+csy], LUx[u+cax], LUy[v+cay], LUx[u+cfx], LUy[v+cfy]
+   int field_count = 2 + 2*(1+3) + 2*(3+1+3+1);
 
    // data records
    int      ri;
@@ -1339,6 +1374,23 @@ void outputCharacteristicsBinary
             records_double[ri++] = cy[5][i][j] - cy[3][i][j]; // cay
             records_double[ri++] = cx[6][i][j] - cx[3][i][j]; // cfx
             records_double[ri++] = cy[6][i][j] - cy[3][i][j]; // cfy
+
+            records_double[ri++] = LUx[0][i][j]; // LUx[u-cfx]
+            records_double[ri++] = LUy[0][i][j]; // LUy[v-cfy]
+            records_double[ri++] = LUx[1][i][j]; // LUx[u-cax]
+            records_double[ri++] = LUy[1][i][j]; // LUy[v-cay]
+            records_double[ri++] = LUx[2][i][j]; // LUx[u-csx]
+            records_double[ri++] = LUy[2][i][j]; // LUy[v-csy]
+            records_double[ri++] = LUx[3][i][j]; // LUx[u]
+            records_double[ri++] = LUy[3][i][j]; // LUy[v]
+            records_double[ri++] = LUx[4][i][j]; // LUx[u+csx]
+            records_double[ri++] = LUy[4][i][j]; // LUy[v+csy]
+            records_double[ri++] = LUx[5][i][j]; // LUx[u+cax]
+            records_double[ri++] = LUy[5][i][j]; // LUy[v+cay]
+            records_double[ri++] = LUx[6][i][j]; // LUx[u+cfx]
+            records_double[ri++] = LUy[6][i][j]; // LUy[v+cfy]
+            records_double[ri++] = LUx[7][i][j]; // ???
+            records_double[ri++] = LUy[7][i][j]; // ???
          }
       }
 
@@ -1360,6 +1412,23 @@ void outputCharacteristicsBinary
             records_float[ri++] = cy[5][i][j] - cy[3][i][j]; // cay
             records_float[ri++] = cx[6][i][j] - cx[3][i][j]; // cfx
             records_float[ri++] = cy[6][i][j] - cy[3][i][j]; // cfy
+
+            records_float[ri++] = LUx[0][i][j]; // LUx[u-cfx]
+            records_float[ri++] = LUy[0][i][j]; // LUy[v-cfy]
+            records_float[ri++] = LUx[1][i][j]; // LUx[u-cax]
+            records_float[ri++] = LUy[1][i][j]; // LUy[v-cay]
+            records_float[ri++] = LUx[2][i][j]; // LUx[u-csx]
+            records_float[ri++] = LUy[2][i][j]; // LUy[v-csy]
+            records_float[ri++] = LUx[3][i][j]; // LUx[u]
+            records_float[ri++] = LUy[3][i][j]; // LUy[v]
+            records_float[ri++] = LUx[4][i][j]; // LUx[u+csx]
+            records_float[ri++] = LUy[4][i][j]; // LUy[v+csy]
+            records_float[ri++] = LUx[5][i][j]; // LUx[u+cax]
+            records_float[ri++] = LUy[5][i][j]; // LUy[v+cay]
+            records_float[ri++] = LUx[6][i][j]; // LUx[u+cfx]
+            records_float[ri++] = LUy[6][i][j]; // LUy[v+cfy]
+            records_float[ri++] = LUx[7][i][j]; // ???
+            records_float[ri++] = LUy[7][i][j]; // ???
          }
       }
 

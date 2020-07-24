@@ -115,6 +115,7 @@ typedef struct {
    bool r_step;
    bool r_end;
    bool divb_step;
+   bool characteristics;
 } t_log_params;
 
 typedef struct {
@@ -193,6 +194,9 @@ typedef struct {
    // Characteristic velocities
    t_matrices cx;
    t_matrices cy;
+   // Characteristic variables
+   t_matrices LUx;
+   t_matrices LUy;
    // Border fluxes
    borderVectors borderFlux;
    // Time
@@ -242,6 +246,8 @@ void outputCharacteristicsBinary
    , const t_params    &params
    , const t_matrices  &cx
    , const t_matrices  &cy
+   , const t_matrices  &LUx
+   , const t_matrices  &LUy
    , double time
    , int    step
    , int    index );

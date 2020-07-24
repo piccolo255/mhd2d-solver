@@ -19,8 +19,10 @@ class SpatialMethodEno : public SpatialIntegrationMethod
       static size_t requiredBufferWidth();
 
       bool getCharacteristicsX( t_matrices cx
+                              , t_matrices LUx
                               ) override;
       bool getCharacteristicsY( t_matrices cy
+                              , t_matrices LUy
                               ) override;
 
    protected:
@@ -31,14 +33,16 @@ class SpatialMethodEno : public SpatialIntegrationMethod
       t_matrices G;
 
       // x and y component of characteristic velocities;
-      // see eq. (2.94) in C.-W. Shu, "Essentially Non-Oscillatory and Weighted
+      // see eqs. (2.92)&(2.94) in C.-W. Shu, "Essentially Non-Oscillatory and Weighted
       // Essentially Non-Oscillatory Schemes for Hyperbolic Conservation Laws",
       // Lecture Notes in Mathematics 1697, pp.325-432, 1998
-      // and eq. (38) in R. Tretler, "Two-dimensional MHD simulation
+      // and Section 2.2 in R. Tretler, "Two-dimensional MHD simulation
       // of the piston-induced rarefaction wave in the Earth's plasma sheet",
       // Master's Thesis, University of Electro-Communications, 2015
       t_matrices _cx;
       t_matrices _cy;
+      t_matrices _LUx;
+      t_matrices _LUy;
 
       // Calculate horizontal and vertical physical fluxes, F and G, from physical values U
       void updateFluxes( const t_matrices U );

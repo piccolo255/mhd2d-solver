@@ -105,7 +105,7 @@ int main
    output_characteristics = output_grid;
    output_characteristics.single_file = false;
    output_characteristics.binary = true;
-   output_characteristics.filename = std::string{"charvel-"} + output_grid.filename;
+   output_characteristics.filename = std::string{"char-"} + output_grid.filename;
    if( output_grid.single_file ){
       openFile( output_grid );
    }
@@ -187,7 +187,7 @@ int main
             break;
          }
       #else
-         retval = stepper->step( data.U, data.cx, data.cy, data.borderFlux, data.dt );
+         retval = stepper->step( data.U, data.cx, data.cy, data.LUx, data.LUy, data.borderFlux, data.dt );
       #endif // OLD_STYLE
 
       // Process the return value
@@ -301,8 +301,9 @@ int main
          toNaturalData( params, data );
       if( output_to_file ){
          outputGridData( output_grid, params, data, step, record_index++ );
-         if(  step > 0 && ( params.scheme == IntegrationMethod::ENO_Roe || params.scheme == IntegrationMethod::ENO_LF ) ){
-            outputCharacteristicsBinary( output_characteristics, params, data.cx, data.cy, data.t_current, step, record_index );
+         if( params.log_params.characteristics && step > 0
+             && ( params.scheme == IntegrationMethod::ENO_Roe || params.scheme == IntegrationMethod::ENO_LF ) ){
+            outputCharacteristicsBinary( output_characteristics, params, data.cx, data.cy, data.LUx, data.LUy, data.t_current, step, record_index );
          }
       }
       if( output_to_non_grid )

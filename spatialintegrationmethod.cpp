@@ -68,6 +68,7 @@ size_t SpatialIntegrationMethod::requiredBufferWidth
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool SpatialIntegrationMethod::getCharacteristicsX
    ( t_matrices /*cx*/
+   , t_matrices /*LUx*/
 ){
    return false;
 }
@@ -75,6 +76,7 @@ bool SpatialIntegrationMethod::getCharacteristicsX
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool SpatialIntegrationMethod::getCharacteristicsY
    ( t_matrices /*cy*/
+   , t_matrices /*LUy*/
 ){
    return false;
 }

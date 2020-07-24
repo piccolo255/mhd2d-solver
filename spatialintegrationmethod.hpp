@@ -28,8 +28,10 @@ class SpatialIntegrationMethod
       static size_t requiredBufferWidth();
 
       virtual bool getCharacteristicsX( t_matrices cx
+                                      , t_matrices LUx
                                       );
       virtual bool getCharacteristicsY( t_matrices cy
+                                      , t_matrices LUy
                                       );
 
    protected:

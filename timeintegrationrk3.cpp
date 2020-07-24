@@ -49,6 +49,8 @@ t_status TimeIntegrationRK3::step
    ( t_matrices      U
    , t_matrices      cx
    , t_matrices      cy
+   , t_matrices      LUx
+   , t_matrices      LUy
    , borderVectors   borderFlux
    , double         &dtCurrent
 ){
@@ -146,8 +148,8 @@ t_status TimeIntegrationRK3::step
    }
 
    dtCurrent = dt;
-   method->getCharacteristicsX( cx );
-   method->getCharacteristicsY( cy );
+   method->getCharacteristicsX( cx, LUx );
+   method->getCharacteristicsY( cy, LUy );
 
    // Everything OK
    return { false, ReturnStatus::OK, "" };

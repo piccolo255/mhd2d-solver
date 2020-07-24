@@ -36,6 +36,7 @@ class SpatialMethodEnoRoe : public SpatialMethodEno
                                 , double  VUF[PRB_DIM][7]
                                 , double  F_[PRB_DIM]
                                 , double  cx[PRB_DIM]
+                                , double  LUx[PRB_DIM]
                                 , double &maxWaveSpeed );
       t_status getNumericalFluxG( double  U1[PRB_DIM]
                                 , double  U2[PRB_DIM]
@@ -43,6 +44,7 @@ class SpatialMethodEnoRoe : public SpatialMethodEno
                                 , double  VUG[PRB_DIM][7]
                                 , double  G_[PRB_DIM]
                                 , double  cy[PRB_DIM]
+                                , double  LUy[PRB_DIM]
                                 , double &maxWaveSpeed );
 };
 

@@ -27,6 +27,8 @@ t_status TimeIntegrationEuler::step
    ( t_matrices      U
    , t_matrices      cx
    , t_matrices      cy
+   , t_matrices      LUx
+   , t_matrices      LUy
    , borderVectors   borderFlux
    , double         &dtCurrent
 ){
@@ -54,8 +56,8 @@ t_status TimeIntegrationEuler::step
          for( auto j = nyFirst; j < nyLast; j++ )
             U[k][i][j] = U[k][i][j] + dt*UL[k][i][j];
    dtCurrent = dt;
-   method->getCharacteristicsX( cx );
-   method->getCharacteristicsY( cy );
+   method->getCharacteristicsX( cx, LUx );
+   method->getCharacteristicsY( cy, LUy );
 
    // Everything OK
    return { false, ReturnStatus::OK, "" };
