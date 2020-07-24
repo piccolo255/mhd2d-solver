@@ -104,14 +104,14 @@ void divBCalculation
    double divb;
    maxdivb = 0.0;
    totdivb = 0.0;
-//   #ifdef OPENMP
-//   // omp-id: div_b_fix:div_b:5
-//   # pragma omp parallel \
-//     default( shared ) \
-//     private ( divb )
-//
-//   # pragma omp for reduction ( + : totdivb ), reduction ( max : maxdivb )
-//   #endif
+   /*#ifdef OPENMP
+   // omp-id: div_b_fix:div_b:5
+   # pragma omp parallel \
+     default( shared ) \
+     private ( divb )
+
+   # pragma omp for reduction ( + : totdivb ), reduction ( max : maxdivb )
+   #endif*/
    for( int i = nxfirst; i < nxlast; i++ ){
       for( int j = nyfirst; j < nylast; j++ ){
          divb = fabs( (U[kbx][i+1][j]-U[kbx][i-1][j])/(2.0*params.dx)

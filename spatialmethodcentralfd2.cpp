@@ -42,7 +42,7 @@ size_t SpatialMethodCentralFD2::requiredBufferWidth
 t_status SpatialMethodCentralFD2::integrate
    ( t_matrices      U
    , t_matrices      UL
-   , borderVectors   borderFlux
+   , borderVectors   /*borderFlux*/
    , double         &dtIdeal
 ){
    auto pressureOK = bool{true};

@@ -708,13 +708,13 @@ void getFluxes
    , const t_params &params
 ){
    // flux F(U), G(U)
-//   #ifdef OPENMP
-//   // omp-id: scheme_eno:get_fluxes:1
-//   # pragma omp parallel \
-//     default( shared )
-//
-//   # pragma omp for
-//   #endif
+   /*#ifdef OPENMP
+   // omp-id: scheme_eno:get_fluxes:1
+   # pragma omp parallel \
+     default( shared )
+
+   # pragma omp for
+   #endif*/
    for( int i = 0; i < NX; i++ ){
       for( int j = 0; j < NY; j++ ){
          double r  = U[0][i][j];

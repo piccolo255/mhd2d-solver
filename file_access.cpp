@@ -471,13 +471,13 @@ void readProblemExplosion
    if( transition_type == "jump" ){
       // nothing to do
    } else {
-      int transition_points = 2*readEntry<int>( pt, "problem", "transition points", 1 );
+      auto transition_points = 2*readEntry<size_t>( pt, "problem", "transition points", 1 );
 
       // prepare transition coefficients
       std::vector<double> transition_coef( transition_points );
       if( transition_type == "linear" ){
          double diff = 1.0/transition_points;
-         for( int i = 0; i < transition_points; i++ ){
+         for( auto i = size_t{0}; i < transition_points; i++ ){
             transition_coef[i] = (transition_points-i - 0.5)*diff;
          }
       } else {
@@ -512,8 +512,8 @@ void readProblemExplosion
       std::vector< std::pair< size_t, size_t > > border_dn;
       std::vector< std::pair< size_t, size_t > > border_lt;
       std::vector< std::pair< size_t, size_t > > border_rt;
-      for( size_t i = NXFIRST; i < NXLAST; i++ ){
-         for( size_t j = NYFIRST; j < NYLAST; j++ ){
+      for( auto i = NXFIRST; i < NXLAST; i++ ){
+         for( auto j = NYFIRST; j < NYLAST; j++ ){
             if( !is_inside(i,j) ) continue;
             if( !is_inside(i-1,j) ) border_lt.push_back( { i , j } );
             if( !is_inside(i+1,j) ) border_rt.push_back( { i , j } );
@@ -1014,9 +1014,9 @@ void readProblemWaveTest
    auto y = double{};
    auto scale_x = 2*M_PI / Lx;
    auto scale_y = 2*M_PI / Ly;
-   for( size_t k = 0; k < PRB_DIM; k++ ){
-      for( size_t i = NXFIRST; i < NXLAST; i++ ){
-         for( size_t j = NYFIRST; j < NYLAST; j++ ){
+   for( auto k = size_t{0}; k < PRB_DIM; k++ ){
+      for( auto i = NXFIRST; i < NXLAST; i++ ){
+         for( auto j = NYFIRST; j < NYLAST; j++ ){
             x = params.start_x + (i-NXFIRST)*params.dx;
             y = params.start_y + (j-NYFIRST)*params.dy;
             data.U[k][i][j] = U_con_avg[k]
@@ -1029,8 +1029,8 @@ void readProblemWaveTest
    auto rot_angle = std::atan2( wavenumber_y, wavenumber_x );
    auto ct = std::cos( rot_angle );
    auto st = std::sin( rot_angle );
-   for( size_t i = NXFIRST; i < NXLAST; i++ ){
-      for( size_t j = NYFIRST; j < NYLAST; j++ ){
+   for( auto i = NXFIRST; i < NXLAST; i++ ){
+      for( auto j = NYFIRST; j < NYLAST; j++ ){
          auto rot_u  = ct*U_u[i][j]  - st*U_v[i][j];
          auto rot_v  = st*U_u[i][j]  + ct*U_v[i][j];
          auto rot_bx = ct*U_bx[i][j] - st*U_by[i][j];
