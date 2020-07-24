@@ -17,6 +17,8 @@ class TimeIntegrationEuler : public TimeIntegrationMethod
       virtual ~TimeIntegrationEuler();
 
       t_status step( t_matrices     U
+                   , t_matrices     cx
+                   , t_matrices     cy
                    , borderVectors  borderFlux
                    , double        &dtCurrent
                    ) override;

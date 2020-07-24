@@ -48,6 +48,7 @@ t_status SpatialMethodEnoRoe::integrate
    //const auto TNLAST  = size_t{6};
    double tU1[PRB_DIM], tU2[PRB_DIM];
    double tF[PRB_DIM][TN], tVUF[PRB_DIM][TN-1], tF_[PRB_DIM];
+   double tc[PRB_DIM];
    auto tMaxWaveSpeed = double{};
 
    // first, boundary conditions
@@ -96,7 +97,7 @@ t_status SpatialMethodEnoRoe::integrate
          }
 
          // find numerical flux
-         status = getNumericalFluxF( tU1, tU2, tF, tVUF, tF_, tMaxWaveSpeed );
+         status = getNumericalFluxF( tU1, tU2, tF, tVUF, tF_, tc, tMaxWaveSpeed );
          if( status.isError ){
             status.message += "\n! SpatialMethodEnoRoe::integrate: F flux";
             return status;
@@ -105,6 +106,7 @@ t_status SpatialMethodEnoRoe::integrate
          //process results
          for( auto k = size_t{0}; k < PRB_DIM; k++ ){
             F_[k][i][j] = tF_[k];
+            _cx[k][i][j] = tc[k];
          }
          if( tMaxWaveSpeed > maxWaveSpeedX )
             maxWaveSpeedX = tMaxWaveSpeed;
@@ -137,7 +139,7 @@ t_status SpatialMethodEnoRoe::integrate
          }
 
          // find numerical flux
-         status = getNumericalFluxG( tU1, tU2, tF, tVUF, tF_, tMaxWaveSpeed );
+         status = getNumericalFluxG( tU1, tU2, tF, tVUF, tF_, tc, tMaxWaveSpeed );
          if( status.isError ){
             status.message += "\n! SpatialMethodEnoRoe::integrate: G flux";
             return status;
@@ -146,6 +148,7 @@ t_status SpatialMethodEnoRoe::integrate
          //process results
          for( auto k = size_t{0}; k < PRB_DIM; k++ ){
             G_[k][i][j] = tF_[k];
+            _cy[k][i][j] = tc[k];
          }
          if( tMaxWaveSpeed > maxWaveSpeedY )
             maxWaveSpeedY = tMaxWaveSpeed;
@@ -180,6 +183,7 @@ t_status SpatialMethodEnoRoe::getNumericalFluxF
    , double    F[PRB_DIM][8]
    , double    VUF[PRB_DIM][7]
    , double    F_[PRB_DIM]
+   , double    cx[PRB_DIM]
    , double   &maxWaveSpeed
 ){
    const auto TNFIRST = size_t{2};
@@ -187,7 +191,8 @@ t_status SpatialMethodEnoRoe::getNumericalFluxF
    const auto i = TNFIRST+1;
 
    // eigenvalues & eigenvectors @ u_(i+1/2)
-   double a[PRB_DIM], lv[PRB_DIM][PRB_DIM], rv[PRB_DIM][PRB_DIM];
+   auto a = cx;
+   double lv[PRB_DIM][PRB_DIM], rv[PRB_DIM][PRB_DIM];
    // characteristics and differences
    double w[PRB_DIM][8], Vw[PRB_DIM][7];
    // fluxes on minus edge, plus edge, and final
@@ -272,6 +277,7 @@ t_status SpatialMethodEnoRoe::getNumericalFluxG
    , double    G[PRB_DIM][8]
    , double    VUG[PRB_DIM][7]
    , double    G_[PRB_DIM]
+   , double    cy[PRB_DIM]
    , double   &maxWaveSpeed
 ){
    // invert x and y axis
@@ -285,7 +291,7 @@ t_status SpatialMethodEnoRoe::getNumericalFluxG
    }
 
    // find flux for inverted x and y
-   auto status = getNumericalFluxF( U1, U2, G, VUG, G_, maxWaveSpeed );
+   auto status = getNumericalFluxF( U1, U2, G, VUG, G_, cy, maxWaveSpeed );
    if( status.status != ReturnStatus::OK ){
       status.message += "\n! SpatialMethodEnoRoe::getNumericalFluxG";
    }

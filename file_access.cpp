@@ -88,6 +88,8 @@ void inputData
    data.U = createMatrices( PRB_DIM, NX, NY );
    data.u = createMatrices( VEL_DIM, NX, NY );
    data.p = createMatrix( NX, NY );
+   data.cx = createMatrices( PRB_DIM, NX, NY );
+   data.cy = createMatrices( PRB_DIM, NX, NY );
    data.borderFlux.left  = createVectors( PRB_DIM, NY );
    data.borderFlux.right = createVectors( PRB_DIM, NY );
    data.borderFlux.up    = createVectors( PRB_DIM, NX );
@@ -1105,6 +1107,17 @@ void outputBinaryHintFile
    if( output_grid.conservation ){
       fprintf( bin_hint.file, "  %d)mx  %d)my  %d)mz  %d)e", i+1, i+2, i+3, i+4 ); i+=4;
    }
+   fprintf( bin_hint.file, "\n" );
+
+   // characteristics: x, y, u, v, csx, csy, cax, cay, cfx, cfy
+   int char_field_count = 2 + PRB_DIM;
+   fprintf( bin_hint.file, "characteristics data fields:"
+      "  1)x  2)y"
+      "  3)u  4)v"
+      "  5)csx  6)csy"
+      "  7)cax  8)cay"
+      "  9)cfx  10)cfy"
+   );
    fprintf( bin_hint.file, "\n\n" );
 
    fprintf( bin_hint.file, "nx = %d\nny = %d\n", params.nx, params.ny );
@@ -1127,6 +1140,17 @@ void outputBinaryHintFile
    fprintf( bin_hint.file, "block_size = %d*%d\n", field_count, field_size );
    fprintf( bin_hint.file, "plot datafile binary record=(nx,ny) skip=index*nx*ny*block_size"
                            " format=\"%%%d%s\" u 1:2:3 w image\n", field_count, binary_data_type );
+
+   fprintf( bin_hint.file, "\nexample gnuplot command for characteristics:\n" );
+   fprintf( bin_hint.file, "datafile = \"charvel-%s\"\n", output_grid.filename.c_str() );
+   fprintf( bin_hint.file, "index = 0\n" );
+   fprintf( bin_hint.file, "nx = %d\nny = %d\n", params.nx, params.ny );
+   fprintf( bin_hint.file, "set xrange [%.2f:%.2f]\nset yrange [%.2f:%.2f]\n",
+                           params.start_x, params.start_x + params.nx*params.dx,
+                           params.start_y, params.start_y + params.ny*params.dy );
+   fprintf( bin_hint.file, "block_size = %d*%d\n", char_field_count, field_size );
+   fprintf( bin_hint.file, "plot datafile binary record=(nx,ny) skip=index*nx*ny*block_size"
+                           " format=\"%%%d%s\" u 1:2:3 w image\n", char_field_count, binary_data_type );
 
    closeFile( bin_hint );
 }
@@ -1260,6 +1284,90 @@ void outputGridDataBinary
    if( !local_output.single_file ){
       closeFile( local_output );
    }
+
+   free( records_float );
+   freeVector( records_double );
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void outputCharacteristicsBinary
+   ( const t_output    &output
+   , const t_params    &params
+   , const t_matrices  &cx
+   , const t_matrices  &cy
+   , double time
+   , int    step
+   , int    index
+){
+   // characteristic velocities (cx, cy): u-cfx, v-cfy, u-cax, v-cay, u-csx, v-csy, u, v, u+csx, v+csy, u+cax, v+cay, u+cfx, v+cfy, dummy, dummy
+   // output fields: x, y, u, v, csx, csy, cax, cay, cfx, cfy
+   int field_count = 2 + 2*4;
+
+   // data records
+   int      ri;
+   size_t   record_count   = field_count*params.nx*params.ny;
+   t_vector records_double = createVector( record_count );
+   float   *records_float  = (float *)malloc( record_count*sizeof(*records_float) );
+
+   t_output local_output = output;
+   char buf[80];
+   std::snprintf( buf, 80, local_output.format_step.c_str(), step );
+   std::string str_step( buf );
+   std::snprintf( buf, 80, local_output.format_index.c_str(), index );
+   std::string str_index( buf );
+   std::snprintf( buf, 80, local_output.format_simtime.c_str(), time );
+   std::string str_time(buf);
+   // Replace masks for output filenames
+   boost::replace_all( local_output.filename, "%rs", str_step  );
+   boost::replace_all( local_output.filename, "%ri", str_index );
+   boost::replace_all( local_output.filename, "%rt", str_time  );
+   openFile( local_output );
+
+   if( local_output.binary_double ){
+      ri = 0;
+      for( int i = NXFIRST; i < NXLAST; i++ ){
+         for( int j = NYFIRST; j < NYLAST; j++ ){
+            // fill record
+            records_double[ri++] = params.start_x + (i-NXFIRST)*params.dx;
+            records_double[ri++] = params.start_y + (j-NYFIRST)*params.dy;
+
+            records_double[ri++] = cx[3][i][j];               // u
+            records_double[ri++] = cy[3][i][j];               // v
+            records_double[ri++] = cx[4][i][j] - cx[3][i][j]; // csx
+            records_double[ri++] = cy[4][i][j] - cy[3][i][j]; // csy
+            records_double[ri++] = cx[5][i][j] - cx[3][i][j]; // cax
+            records_double[ri++] = cy[5][i][j] - cy[3][i][j]; // cay
+            records_double[ri++] = cx[6][i][j] - cx[3][i][j]; // cfx
+            records_double[ri++] = cy[6][i][j] - cy[3][i][j]; // cfy
+         }
+      }
+
+      // write all of the records to file at once
+      fwrite( records_double, sizeof(*records_double), record_count, local_output.file );
+   } else {
+      ri = 0;
+      for( int i = NXFIRST; i < NXLAST; i++ ){
+         for( int j = NYFIRST; j < NYLAST; j++ ){
+            // fill record
+            records_float[ri++] = params.start_x + (i-NXFIRST)*params.dx;
+            records_float[ri++] = params.start_y + (j-NYFIRST)*params.dy;
+
+            records_float[ri++] = cx[3][i][j];               // u
+            records_float[ri++] = cy[3][i][j];               // v
+            records_float[ri++] = cx[4][i][j] - cx[3][i][j]; // csx
+            records_float[ri++] = cy[4][i][j] - cy[3][i][j]; // csy
+            records_float[ri++] = cx[5][i][j] - cx[3][i][j]; // cax
+            records_float[ri++] = cy[5][i][j] - cy[3][i][j]; // cay
+            records_float[ri++] = cx[6][i][j] - cx[3][i][j]; // cfx
+            records_float[ri++] = cy[6][i][j] - cy[3][i][j]; // cfy
+         }
+      }
+
+      // write all of the records to file at once
+      fwrite( records_float, sizeof(*records_float), record_count, local_output.file );
+   }
+
+   closeFile( local_output );
 
    free( records_float );
    freeVector( records_double );
@@ -1491,7 +1599,7 @@ void outputGridData
    if( output.binary ){
       outputGridDataBinary( output, params, data, step, index, divb_nxfirst, divb_nxlast, divb_nyfirst, divb_nylast, uumax );
    } else {
-      outputGridDataText(   output, params, data, step, index, divb_nxfirst, divb_nxlast, divb_nyfirst, divb_nylast, uumax );
+      outputGridDataText( output, params, data, step, index, divb_nxfirst, divb_nxlast, divb_nyfirst, divb_nylast, uumax );
    }
 }
 

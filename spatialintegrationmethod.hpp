@@ -27,6 +27,11 @@ class SpatialIntegrationMethod
 
       static size_t requiredBufferWidth();
 
+      virtual bool getCharacteristicsX( t_matrices cx
+                                      );
+      virtual bool getCharacteristicsY( t_matrices cy
+                                      );
+
    protected:
       static const size_t minimumBufferWidth = 0;
 

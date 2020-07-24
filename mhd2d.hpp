@@ -190,6 +190,9 @@ typedef struct {
    // Primitive variables; velocity and pressure
    t_matrices u;
    t_matrix   p;
+   // Characteristic velocities
+   t_matrices cx;
+   t_matrices cy;
    // Border fluxes
    borderVectors borderFlux;
    // Time
@@ -232,6 +235,16 @@ void outputNonGridData
    , const t_data   &data
    , int step
    , int index );
+
+// Output characteristics in binary format
+void outputCharacteristicsBinary
+   ( const t_output    &output
+   , const t_params    &params
+   , const t_matrices  &cx
+   , const t_matrices  &cy
+   , double time
+   , int    step
+   , int    index );
 
 // Conversion - conservation to natural variables
 void toNaturalPoint

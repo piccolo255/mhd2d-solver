@@ -21,6 +21,17 @@ SpatialMethodEno::SpatialMethodEno
 
    F = createMatrices( PRB_DIM, nxTotal, nyTotal );
    G = createMatrices( PRB_DIM, nxTotal, nyTotal );
+
+   _cx = createMatrices( PRB_DIM, nxTotal, nyTotal );
+   _cy = createMatrices( PRB_DIM, nxTotal, nyTotal );
+   for( auto k = 0; k < PRB_DIM; k++ ){
+      for( auto i = size_t{0}; i < nxTotal; i++ ){
+         for( auto j = size_t{0}; j < nyTotal; j++ ){
+            _cx[k][i][j] = 0.0;
+            _cy[k][i][j] = 0.0;
+         }
+      }
+   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -29,6 +40,39 @@ SpatialMethodEno::~SpatialMethodEno
 ){
    freeMatrices( F );
    freeMatrices( G );
+
+   freeMatrices( _cx );
+   freeMatrices( _cy );
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+bool SpatialMethodEno::getCharacteristicsX
+   ( t_matrices cx
+){
+   for( auto k = 0; k < PRB_DIM; k++ ){
+      for( auto i = size_t{0}; i < nxTotal; i++ ){
+         for( auto j = size_t{0}; j < nyTotal; j++ ){
+            cx[k][i][j] = _cx[k][i][j];
+         }
+      }
+   }
+
+   return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+bool SpatialMethodEno::getCharacteristicsY
+   ( t_matrices cy
+){
+   for( auto k = 0; k < PRB_DIM; k++ ){
+      for( auto i = size_t{0}; i < nxTotal; i++ ){
+         for( auto j = size_t{0}; j < nyTotal; j++ ){
+            cy[k][i][j] = _cy[k][i][j];
+         }
+      }
+   }
+
+   return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

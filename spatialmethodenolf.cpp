@@ -49,6 +49,7 @@ t_status SpatialMethodEnoLF::integrate
    //const int TNLAST  = 6;
    double tU1[PRB_DIM], tU2[PRB_DIM], tU[PRB_DIM][TN];
    double tF[PRB_DIM][TN], tF_[PRB_DIM];
+   double tc[PRB_DIM];
    double talpha[PRB_DIM];
    auto tMaxWaveSpeed = double{};
 
@@ -148,7 +149,7 @@ t_status SpatialMethodEnoLF::integrate
          }
 
          // find numerical flux
-         status = getNumericalFluxF( tU1, tU2, tU, tF, talpha, tF_, tMaxWaveSpeed );
+         status = getNumericalFluxF( tU1, tU2, tU, tF, talpha, tF_, tc, tMaxWaveSpeed );
          if( status.isError ){
             status.message += "\n! SpatialMethodEnoLF::integrate: F flux";
             return status;
@@ -157,6 +158,7 @@ t_status SpatialMethodEnoLF::integrate
          //process results
          for( auto k = size_t{0}; k < PRB_DIM; k++ ){
             F_[k][i][j] = tF_[k];
+            _cx[k][i][j] = tc[k];
          }
          if( tMaxWaveSpeed > maxWaveSpeedX )
             maxWaveSpeedX = tMaxWaveSpeed;
@@ -188,7 +190,7 @@ t_status SpatialMethodEnoLF::integrate
          }
 
          // find numerical flux
-         status = getNumericalFluxG( tU1, tU2, tU, tF, talpha, tF_, tMaxWaveSpeed );
+         status = getNumericalFluxG( tU1, tU2, tU, tF, talpha, tF_, tc, tMaxWaveSpeed );
          if( status.isError ){
             status.message += "\n! SpatialMethodEnoLF::integrate: G flux";
             return status;
@@ -197,6 +199,7 @@ t_status SpatialMethodEnoLF::integrate
          //process results
          for( auto k = size_t{0}; k < PRB_DIM; k++ ){
             G_[k][i][j] = tF_[k];
+            _cy[k][i][j] = tc[k];
          }
          if( tMaxWaveSpeed > maxWaveSpeedY )
             maxWaveSpeedY = tMaxWaveSpeed;
@@ -232,6 +235,7 @@ t_status SpatialMethodEnoLF::getNumericalFluxF
    , double    F[PRB_DIM][8]
    , double    alpha[PRB_DIM]
    , double    F_[PRB_DIM]
+   , double    cx[PRB_DIM]
    , double   &maxWaveSpeed
 ){
    const auto TNFIRST = size_t{2};
@@ -239,7 +243,8 @@ t_status SpatialMethodEnoLF::getNumericalFluxF
    const auto i = TNFIRST+1;
 
    // eigenvalues & eigenvectors @ u_(i+1/2)
-   double a[PRB_DIM], lv[PRB_DIM][PRB_DIM], rv[PRB_DIM][PRB_DIM];
+   auto a = cx;
+   double lv[PRB_DIM][PRB_DIM], rv[PRB_DIM][PRB_DIM];
    // characteristics and differences
    double RU[PRB_DIM][8], RF[PRB_DIM][8];
    double w[PRB_DIM][8], Vw[PRB_DIM][7];
@@ -330,6 +335,7 @@ t_status SpatialMethodEnoLF::getNumericalFluxG
    , double    G[PRB_DIM][8]
    , double    alpha[PRB_DIM]
    , double    G_[PRB_DIM]
+   , double    cy[PRB_DIM]
    , double   &maxWaveSpeed
 ){
    // invert x and y axis
@@ -341,7 +347,7 @@ t_status SpatialMethodEnoLF::getNumericalFluxG
    }
 
    // find flux for inverted x and y
-   auto status = getNumericalFluxF( U1, U2, U, G, alpha, G_, maxWaveSpeed );
+   auto status = getNumericalFluxF( U1, U2, U, G, alpha, G_, cy, maxWaveSpeed );
    if( status.status != ReturnStatus::OK ){
       status.message += "\n! SpatialMethodEnoLF::getNumericalFluxG";
    }

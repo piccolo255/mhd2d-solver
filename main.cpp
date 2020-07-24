@@ -82,6 +82,7 @@ int main
    // output file information
    t_output output_grid;
    t_output output_non_grid;
+   t_output output_characteristics;
    // parameters
    t_params params;
    // variables
@@ -99,7 +100,12 @@ int main
    }
 
    /* Initialize */
+   // Output files
    inputData( argv[1], output_grid, output_non_grid, params, data );
+   output_characteristics = output_grid;
+   output_characteristics.single_file = false;
+   output_characteristics.binary = true;
+   output_characteristics.filename = std::string{"charvel-"} + output_grid.filename;
    if( output_grid.single_file ){
       openFile( output_grid );
    }
@@ -107,6 +113,7 @@ int main
    outputGridData( output_grid, params, data, 0, 0 );
    outputNonGridData( output_non_grid, params, data, 0, 0 );
 
+   // Spatial integrator
    auto bufferWidth = size_t{NXFIRST};
    auto boundary = t_boundary{ params.boundary[params.b_right]
                              , params.boundary[params.b_top]
@@ -130,6 +137,7 @@ int main
    }
    method_ptr->initializeDirichletBoundaries( data.U );
 
+   // Time integrator
    switch( params.time_stepping ){
    case TimeStepMethod::Undefined:
       criticalError( ReturnStatus::ErrorWrongParameter, std::string{}
@@ -142,6 +150,7 @@ int main
       break;
    }
 
+   // Frequency of reporting progress to stdout
    int step_progress = 0;
    if( params.time_mode == TimeStepMode::Constant )
       step_progress = (params.steps>100) ? params.steps/100 : 1;
@@ -178,7 +187,7 @@ int main
             break;
          }
       #else
-         retval = stepper->step( data.U, data.borderFlux, data.dt );
+         retval = stepper->step( data.U, data.cx, data.cy, data.borderFlux, data.dt );
       #endif // OLD_STYLE
 
       // Process the return value
@@ -290,8 +299,12 @@ int main
       // output data to file
       if( output_to_file || output_to_non_grid )
          toNaturalData( params, data );
-      if( output_to_file )
+      if( output_to_file ){
          outputGridData( output_grid, params, data, step, record_index++ );
+         if(  step > 0 && ( params.scheme == IntegrationMethod::ENO_Roe || params.scheme == IntegrationMethod::ENO_LF ) ){
+            outputCharacteristicsBinary( output_characteristics, params, data.cx, data.cy, data.t_current, step, record_index );
+         }
+      }
       if( output_to_non_grid )
          outputNonGridData( output_non_grid, params, data, step, record_index );
 
