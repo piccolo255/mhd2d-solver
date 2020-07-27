@@ -1116,7 +1116,8 @@ void outputBinaryHintFile
    //                  LUx[u-cfx], LUy[v-cfy], LUx[u-cax], LUy[v-cay], LUx[u-csx], LUy[v-csy],
    //                  LUx[u], LUy[v],
    //                  LUx[u+csx], LUy[v+csy], LUx[u+cax], LUy[v+cay], LUx[u+cfx], LUy[v+cfy]
-   int char_field_count = 2 + 2*(1+3) + 2*(3+1+3);
+   //                  dummy, dummy
+   int char_field_count = 2 + 2*(1+3) + 2*(3+1+3+1);
    fprintf( bin_hint.file, "characteristics data fields:"
       "\n"
       "  1)x"
@@ -1147,6 +1148,9 @@ void outputBinaryHintFile
       "  22)LUy[v+cay]"
       "  23)LUx[u+cfx]"
       "  24)LUy[v+cfy]"
+      "\n"
+      "  25)dummy"
+      "  26)dummy"
    );
    fprintf( bin_hint.file, "\n\n" );
 
